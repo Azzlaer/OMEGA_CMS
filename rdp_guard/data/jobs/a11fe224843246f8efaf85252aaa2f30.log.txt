@@ -1,0 +1,6 @@
+﻿[2026-09-18 17:51:06] 10% - Creando directorio de servicio
+[2026-09-18 17:51:06] 25% - Instalando worker anti-bruteforce
+[2026-09-18 17:51:06] 40% - Guardando whitelist
+[2026-09-18 17:51:06] 60% - Creando tarea programada
+[2026-09-18 17:51:11] 80% - Ejecutando prueba inicial
+[2026-09-18 17:51:13] 100% - Anti-bruteforce instalado

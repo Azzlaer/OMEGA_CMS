@@ -1,0 +1,428 @@
+#iv-app{--accent:#d4af37;padding:20px;border-radius:18px;background:#0b0d12 center/cover;color:#eee}#iv-app header{display:flex;justify-content:space-between;align-items:center;padding:24px;border-radius:15px;background:linear-gradient(135deg,#181b23,#0c0e13);font-size:60px}#iv-app header span{font-size:11px;letter-spacing:.2em;color:var(--accent)}#iv-app header h1{margin:4px 0;font-size:32px}#iv-app header p{margin:0;font-size:15px;color:#bfc3cd}.iv-characters{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}.iv-characters a{padding:10px 14px;border:1px solid #303541;border-radius:9px;background:#151821;color:#fff;text-decoration:none}.iv-characters a.active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}.iv-characters small{display:block;color:#8e95a4}.iv-profile{display:flex;justify-content:space-between;align-items:center}.iv-profile h2{margin:0}.iv-online.on{color:#42d37d}.iv-online.off{color:#999}.iv-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:14px 0}.iv-stats div{padding:10px;background:#14171e;border-radius:9px;text-align:center}.iv-stats span{display:block;color:#8f96a5;font-size:11px}.iv-guild{padding:12px;margin-bottom:14px;border-left:4px solid var(--accent);background:rgba(212,175,55,.08)}.iv-panels{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.iv-panel{padding:16px;border:1px solid #303541;border-radius:14px;background:#12151c;overflow:auto}.iv-grid{position:relative;width:calc(var(--cols)*var(--cell));height:calc(15*var(--cell));margin:auto;background-image:linear-gradient(#343844 1px,transparent 1px),linear-gradient(90deg,#343844 1px,transparent 1px);background-size:var(--cell) var(--cell);background-color:#0c0e13}.iv-item{position:absolute;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.04);z-index:2}.iv-item img{max-width:100%;max-height:100%;image-rendering:auto}.iv-item.excellent{filter:drop-shadow(0 0 6px #38e66b)}.iv-item.ancient{filter:drop-shadow(0 0 6px #e7c94a)}#iv-tooltip{position:fixed;z-index:99999;max-width:290px;padding:10px;border:1px solid var(--accent);border-radius:8px;background:rgba(5,6,8,.96);color:#fff;pointer-events:none}#iv-tooltip[hidden]{display:none}#iv-app footer{text-align:center;margin-top:18px;color:#abb1be}@media(max-width:900px){.iv-panels{grid-template-columns:1fr}.iv-stats{grid-template-columns:repeat(3,1fr)}}
+.iv-inventory-panel{grid-column:span 1}.iv-inventory-layout{display:flex;gap:18px;align-items:flex-start;justify-content:center;flex-wrap:wrap}.iv-inventory-layout h3{text-align:center;color:#c9ced8;font-size:14px}.iv-equipment{position:relative;width:288px;height:330px;margin:auto;border:1px solid #3a404d;border-radius:10px;background:radial-gradient(circle at center,rgba(71,82,105,.35),rgba(10,12,17,.95) 65%),linear-gradient(#202632 1px,transparent 1px),linear-gradient(90deg,#202632 1px,transparent 1px);background-size:auto,32px 32px,32px 32px;overflow:hidden}.iv-character-silhouette{position:absolute;left:104px;top:73px;width:80px;height:185px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:45% 45% 25% 25%;background:linear-gradient(180deg,#303849,#151923);color:#768095;font-size:46px;opacity:.85}.iv-character-silhouette span{font-size:11px}.iv-equip-item{position:absolute;display:flex;align-items:center;justify-content:center;z-index:3}.iv-equip-item img,.iv-item img{display:block;max-width:100%;max-height:100%;object-fit:contain}.iv-missing{display:flex;width:100%;height:100%;align-items:center;justify-content:center;border:1px dashed #6e7480;color:#b8bec9;background:rgba(255,255,255,.05)}.iv-grid{height:calc(var(--rows)*var(--cell))}.iv-equip-item.excellent{filter:drop-shadow(0 0 6px #38e66b)}.iv-equip-item.ancient{filter:drop-shadow(0 0 6px #e7c94a)}
+
+/* ===== Skin clásico MU Online ===== */
+.iv-inventory-layout{gap:20px}
+.iv-equipment-classic{
+ width:256px;
+ height:416px;
+ border:0;
+ border-radius:0;
+ background:url('../skin/viewinventory_bg.gif') no-repeat top left;
+ position:relative;
+ overflow:hidden;
+}
+.iv-equipment-classic .iv-equip-item{z-index:5}
+.iv-equipment-classic .iv-equip-item img{image-rendering:auto}
+.iv-classic-frame{padding:0;background:transparent}
+.iv-backpack-frame .iv-grid{
+ width:256px;
+ height:256px;
+ background:url('../skin/warehouse_bg.gif') repeat;
+ border:0;
+}
+.iv-grid-classic{
+ background-image:url('../skin/warehouse_block.gif') !important;
+ background-repeat:repeat !important;
+ background-size:32px 32px !important;
+ background-color:#080a0d !important;
+}
+.iv-grid-classic .iv-item{
+ background:url('../skin/warehouse_item_block.gif') repeat;
+}
+.iv-warehouse-shell{
+ width:304px;
+ margin:0 auto;
+ background:#08090b;
+}
+.iv-warehouse-top{
+ width:304px;
+ height:57px;
+ background:url('../skin/warehouse_top.gif') no-repeat top left;
+}
+.iv-warehouse-body{
+ display:flex;
+ align-items:stretch;
+ width:304px;
+ min-height:480px;
+}
+.iv-warehouse-left{
+ width:24px;
+ min-height:480px;
+ background:url('../skin/warehouse_left.gif') repeat-y top left;
+ flex:0 0 24px;
+}
+.iv-warehouse-right{
+ width:24px;
+ min-height:480px;
+ background:url('../skin/warehouse_right.gif') repeat-y top right;
+ flex:0 0 24px;
+}
+.iv-warehouse-body .iv-grid{
+ width:256px;
+ height:480px;
+ flex:0 0 256px;
+}
+.iv-warehouse-bottom{
+ width:304px;
+ height:73px;
+ background:url('../skin/warehouse_bottom.gif') no-repeat bottom left;
+}
+.iv-inventory-panel,.iv-panel{overflow:visible}
+.iv-panel{min-width:0}
+@media(max-width:700px){
+ .iv-warehouse-shell{transform-origin:top left}
+}
+
+/* ===== Selector de estilos ===== */
+.iv-style-modern .iv-equipment-classic{
+ width:288px;
+ height:330px;
+ border:1px solid #3a404d;
+ border-radius:12px;
+ background:
+  radial-gradient(circle at center,rgba(71,82,105,.35),rgba(10,12,17,.95) 65%),
+  linear-gradient(#202632 1px,transparent 1px),
+  linear-gradient(90deg,#202632 1px,transparent 1px);
+ background-size:auto,32px 32px,32px 32px;
+}
+.iv-style-modern .iv-modern-equipment{
+ padding:12px;
+ border:1px solid #303541;
+ border-radius:13px;
+ background:linear-gradient(180deg,#151922,#0c0f15);
+}
+.iv-style-modern .iv-modern-equipment .iv-equipment{
+ width:288px;
+ height:330px;
+ background:
+  radial-gradient(circle at center,rgba(71,82,105,.32),rgba(10,12,17,.96) 68%),
+  linear-gradient(#262b36 1px,transparent 1px),
+  linear-gradient(90deg,#262b36 1px,transparent 1px);
+ background-size:auto,32px 32px,32px 32px;
+ border:1px solid #3a404d;
+ border-radius:10px;
+}
+.iv-style-modern .iv-modern-backpack,
+.iv-style-modern .iv-modern-warehouse{
+ padding:12px;
+ border:1px solid #303541;
+ border-radius:13px;
+ background:linear-gradient(180deg,#151922,#0c0f15);
+ overflow:auto;
+}
+.iv-style-modern .iv-grid:not(.iv-grid-classic){
+ background-image:
+  linear-gradient(#343844 1px,transparent 1px),
+  linear-gradient(90deg,#343844 1px,transparent 1px);
+ background-size:var(--cell) var(--cell);
+ background-color:#0c0e13;
+ border:1px solid #373c48;
+}
+.iv-style-modern .iv-grid:not(.iv-grid-classic) .iv-item{
+ background:rgba(255,255,255,.035);
+ border:1px solid rgba(255,255,255,.04);
+}
+.iv-style-modern .iv-panel{
+ box-shadow:0 12px 28px rgba(0,0,0,.22);
+}
+.iv-style-modern .iv-warehouse-shell,
+.iv-style-modern .iv-classic-frame{
+ display:none;
+}
+.iv-style-classic .iv-modern-equipment,
+.iv-style-classic .iv-modern-backpack,
+.iv-style-classic .iv-modern-warehouse{
+ display:none;
+}
+
+/* ===== Corrección de ranuras del personaje v1.0.5 ===== */
+.iv-equipment-classic{
+ position:relative;
+ width:256px;
+ height:480px;
+ background:url('../skin/viewinventory_bg.gif') no-repeat top left;
+ overflow:hidden;
+}
+.iv-equip-slot{
+ position:absolute;
+ z-index:6;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ overflow:visible;
+ pointer-events:auto;
+}
+.iv-equip-image{
+ width:100%;
+ height:100%;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ overflow:visible;
+}
+.iv-equip-slot img{
+ display:block;
+ width:100%;
+ height:100%;
+ max-width:100%;
+ max-height:100%;
+ object-fit:contain;
+ object-position:center;
+ image-rendering:auto;
+}
+.iv-equip-slot.slot-wings img{
+ width:100%;
+ height:100%;
+ max-width:none;
+ max-height:none;
+ object-fit:contain;
+ transform:scale(1.12);
+}
+.iv-equip-slot.slot-weapon-left img,
+.iv-equip-slot.slot-weapon-right img{
+ width:100%;
+ height:100%;
+ object-fit:contain;
+}
+.iv-equip-slot.slot-armor img,
+.iv-equip-slot.slot-pants img,
+.iv-equip-slot.slot-boots img,
+.iv-equip-slot.slot-gloves img{
+ object-fit:contain;
+}
+.iv-equip-slot.slot-pendant img,
+.iv-equip-slot.slot-ring-left img,
+.iv-equip-slot.slot-ring-right img{
+ width:90%;
+ height:90%;
+}
+.iv-equip-slot.excellent{
+ filter:drop-shadow(0 0 6px #38e66b);
+}
+.iv-equip-slot.ancient{
+ filter:drop-shadow(0 0 6px #e7c94a);
+}
+.iv-classic-bag-item{
+ position:absolute;
+ z-index:7;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ background:url('../skin/warehouse_item_block.gif') repeat;
+}
+.iv-classic-bag-item img{
+ width:100%;
+ height:100%;
+ max-width:100%;
+ max-height:100%;
+ object-fit:contain;
+}
+.iv-style-classic .iv-inventory-layout{
+ display:block;
+}
+.iv-style-classic .iv-inventory-layout>div{
+ width:256px;
+ margin:0 auto;
+}
+.iv-style-classic .iv-inventory-layout h3{
+ margin-bottom:8px;
+}
+
+/* ===== Inventario clásico exacto v1.0.6 ===== */
+.iv-style-classic .iv-equipment-classic{
+ width:256px !important;
+ height:480px !important;
+ background:url('../skin/viewinventory_bg.gif') no-repeat 0 0 !important;
+ background-size:256px 480px !important;
+ border:0 !important;
+ border-radius:0 !important;
+ position:relative;
+ overflow:hidden;
+}
+
+.iv-style-classic .iv-equip-slot{
+ position:absolute;
+ z-index:10;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ overflow:hidden;
+ padding:1px;
+ box-sizing:border-box;
+}
+
+.iv-style-classic .iv-equip-image{
+ width:100%;
+ height:100%;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ overflow:hidden;
+}
+
+.iv-style-classic .iv-equip-slot img{
+ display:block;
+ width:100%;
+ height:100%;
+ max-width:100%;
+ max-height:100%;
+ object-fit:contain;
+ object-position:center;
+}
+
+/* Las alas necesitan ocupar el recuadro ancho completo. */
+.iv-style-classic .iv-equip-slot.slot-wings{
+ overflow:visible;
+}
+.iv-style-classic .iv-equip-slot.slot-wings .iv-equip-image{
+ overflow:visible;
+}
+.iv-style-classic .iv-equip-slot.slot-wings img{
+ width:112%;
+ height:112%;
+ max-width:none;
+ max-height:none;
+ object-fit:contain;
+ transform:translate(-5%, -5%);
+}
+
+/* Armas largas: conservar proporción dentro de la columna vertical. */
+.iv-style-classic .iv-equip-slot.slot-weapon-left img,
+.iv-style-classic .iv-equip-slot.slot-weapon-right img{
+ width:100%;
+ height:100%;
+ object-fit:contain;
+}
+
+/* Piezas centrales y accesorios. */
+.iv-style-classic .iv-equip-slot.slot-armor img,
+.iv-style-classic .iv-equip-slot.slot-pants img,
+.iv-style-classic .iv-equip-slot.slot-gloves img,
+.iv-style-classic .iv-equip-slot.slot-boots img,
+.iv-style-classic .iv-equip-slot.slot-helm img,
+.iv-style-classic .iv-equip-slot.slot-pet img{
+ object-fit:contain;
+}
+
+.iv-style-classic .iv-equip-slot.slot-pendant img,
+.iv-style-classic .iv-equip-slot.slot-ring-left img,
+.iv-style-classic .iv-equip-slot.slot-ring-right img{
+ width:90%;
+ height:90%;
+ object-fit:contain;
+}
+
+/* Mochila integrada: comienza en Y=224 y usa 8x8 casillas. */
+.iv-style-classic .iv-classic-bag-item{
+ position:absolute;
+ z-index:9;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ overflow:hidden;
+ background:transparent !important;
+}
+.iv-style-classic .iv-classic-bag-item img{
+ width:100%;
+ height:100%;
+ max-width:100%;
+ max-height:100%;
+ object-fit:contain;
+}
+
+.iv-style-classic .iv-inventory-frame,
+.iv-style-classic .iv-inventory-layout > div{
+ width:256px !important;
+ max-width:256px !important;
+}
+
+.iv-style-classic .iv-inventory-layout{
+ display:block !important;
+}
+
+/* ===== Pulido final v1.0.7 ===== */
+.iv-stats-actions{
+ display:flex;
+ justify-content:flex-end;
+ margin:12px 0 6px;
+}
+.iv-stats-actions button{
+ padding:7px 11px;
+ border:1px solid #363c48;
+ border-radius:8px;
+ background:#171b23;
+ color:#dce1e9;
+ cursor:pointer;
+}
+.iv-stats-actions button:hover{
+ border-color:var(--accent);
+ color:#fff;
+}
+.iv-online-warning{
+ margin:14px 0;
+ padding:13px 15px;
+ border:1px solid #9f7326;
+ border-left:4px solid #d49b2d;
+ border-radius:9px;
+ background:rgba(212,155,45,.1);
+ color:#f0d7a3;
+}
+.iv-counter{
+ margin:12px 0 0;
+ padding:9px 11px;
+ border-radius:8px;
+ background:#0d1016;
+ color:#cbd1dc;
+ font-size:12px;
+ text-align:center;
+}
+.iv-legend{
+ display:flex;
+ justify-content:center;
+ flex-wrap:wrap;
+ gap:12px;
+ margin:18px 0 4px;
+ padding:11px;
+ border:1px solid #292e39;
+ border-radius:10px;
+ background:#10131a;
+}
+.iv-legend span{
+ display:inline-flex;
+ align-items:center;
+ gap:6px;
+ color:#bfc5d0;
+ font-size:12px;
+}
+.iv-legend i{
+ width:11px;
+ height:11px;
+ border-radius:50%;
+ display:inline-block;
+ box-shadow:0 0 8px currentColor;
+}
+.iv-legend .normal{background:#d8dde5;color:#d8dde5}
+.iv-legend .excellent{background:#39df6a;color:#39df6a}
+.iv-legend .ancient{background:#e3c446;color:#e3c446}
+.iv-legend .harmony{background:#a868e8;color:#a868e8}
+.iv-legend .socket{background:#ef72c7;color:#ef72c7}
+
+.iv-item.unknown,.iv-equip-slot.unknown{
+    outline:1px dashed #b97832;
+    background:rgba(120,72,24,.16)
+}
+.iv-item.unknown .iv-missing,.iv-equip-slot.unknown .iv-missing{color:#e9a653}
+.iv-ext-tabs{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 14px}
+.iv-ext-tabs a{display:grid;gap:2px;padding:8px 12px;border:1px solid #3d3421;border-radius:7px;background:#101010;color:#c9c9c9;text-decoration:none}
+.iv-ext-tabs a small{font-size:10px;color:#7f8991}
+.iv-ext-tabs a.active{border-color:var(--accent);color:var(--accent);background:#211b0d}
+.iv-format-badge{margin:0 0 12px;padding:8px 11px;border:1px solid #345167;border-radius:6px;background:#0e1820;color:#a7c8dd;font-size:11px}
+.iv-layout-warning{margin-top:10px;padding:10px;border:1px solid #8c572a;border-radius:6px;background:#25150c;color:#e8aa72}
+.iv-legend i.unknown{background:#b97832}
+
+.iv-ignored{color:#c68a54;font-size:11px}
+
+.iv-image-browser img{filter:none!important}
+
+.iv-kpi{display:inline-block;padding:7px 10px;background:#0b141d;border:1px solid #304050;border-radius:6px;color:#b9c7d3;font-size:11px}

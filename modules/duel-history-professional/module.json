@@ -1,0 +1,53 @@
+{
+  "name": "Duel History Professional",
+  "slug": "duel-history-professional",
+  "version": "1.0.1",
+  "author": "Omega MU CMS",
+  "description": "Historial PvP profesional para Mi Cuenta usando DuelHistory y DuelRanking. Incluye compatibilidad corregida con PDO_SQLSRV/ODBC Driver 18.",
+  "minimum_core": "0.18.0",
+  "enabled_by_default": true,
+  "user_menu": {
+    "label": "Duel History",
+    "icon": "⚔️",
+    "order": 35
+  },
+  "config_schema": [
+    {
+      "key": "history_limit",
+      "label": "Cantidad máxima de duelos",
+      "type": "integer",
+      "default": 50,
+      "min": 10,
+      "max": 200,
+      "help": "Cantidad máxima de registros mostrados en Mi Cuenta."
+    },
+    {
+      "key": "show_map",
+      "label": "Mostrar mapa / arena",
+      "type": "boolean",
+      "default": true,
+      "help": "Muestra MapNumber y ArenaID cuando existen."
+    },
+    {
+      "key": "show_duration",
+      "label": "Mostrar duración",
+      "type": "boolean",
+      "default": true,
+      "help": "Muestra DurationSeconds cuando existe."
+    },
+    {
+      "key": "show_finish_reason",
+      "label": "Mostrar motivo de finalización",
+      "type": "boolean",
+      "default": true,
+      "help": "Muestra FinishReason cuando existe."
+    },
+    {
+      "key": "show_ranking_cards",
+      "label": "Mostrar estadísticas DuelRanking",
+      "type": "boolean",
+      "default": true,
+      "help": "Muestra tarjetas acumuladas de DuelRanking por personaje."
+    }
+  ]
+}

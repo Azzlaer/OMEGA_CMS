@@ -1,0 +1,8 @@
+﻿[2026-09-18 17:54:06] 5% - Consultando evento 4625
+[2026-09-18 17:54:09] 30% - Procesando 100 eventos
+[2026-09-18 17:54:09] 44% - Procesando 25 de 100
+[2026-09-18 17:54:09] 58% - Procesando 50 de 100
+[2026-09-18 17:54:09] 71% - Procesando 75 de 100
+[2026-09-18 17:54:10] 85% - Procesando 100 de 100
+[2026-09-18 17:54:10] 92% - Calculando resumen
+[2026-09-18 17:54:10] 100% - Visor listo: 100 eventos

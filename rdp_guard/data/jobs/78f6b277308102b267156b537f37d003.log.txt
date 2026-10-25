@@ -1,0 +1,10 @@
+﻿[2026-09-18 17:43:40] 5% - Buscando usuario admin
+[2026-09-18 17:43:41] 15% - Habilitando cuenta
+[2026-09-18 17:43:41] 25% - Intentando desbloquear cuenta
+[2026-09-18 17:43:41] 35% - Configurando politica de bloqueo
+[2026-09-18 17:43:42] 48% - Habilitando Escritorio remoto
+[2026-09-18 17:43:42] 60% - Configurando TermService
+[2026-09-18 17:43:42] 70% - Agregando usuario a Remote Desktop Users
+[2026-09-18 17:43:42] 82% - Creando regla de firewall de recuperacion
+[2026-09-18 17:43:46] 92% - Probando listener RDP
+[2026-09-18 17:43:58] 100% - Recuperacion terminada

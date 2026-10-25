@@ -1,0 +1,11 @@
+﻿[2026-09-18 17:42:15] 5% - Comprobando privilegios
+[2026-09-18 17:42:16] 14% - Leyendo politica de cuentas
+[2026-09-18 17:42:16] 24% - Leyendo usuarios locales
+[2026-09-18 17:42:16] 38% - Leyendo RDP, NLA y puerto
+[2026-09-18 17:42:16] 48% - Comprobando servicio RDP
+[2026-09-18 17:42:16] 58% - Probando escucha local del puerto RDP
+[2026-09-18 17:42:32] 68% - Leyendo grupos de acceso remoto
+[2026-09-18 17:42:33] 78% - Leyendo firewall
+[2026-09-18 17:42:40] 88% - Leyendo eventos de bloqueo
+[2026-09-18 17:42:42] 96% - Guardando diagnostico
+[2026-09-18 17:42:42] 100% - Diagnostico terminado

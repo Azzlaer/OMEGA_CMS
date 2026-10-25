@@ -1,0 +1,49 @@
+{
+  "name": "Guild Ranking Professional",
+  "slug": "guild-ranking-professional",
+  "version": "3.0.0",
+  "author": "Omega MU CMS",
+  "description": "Vista profesional pública de rankings de clanes. Se integra junto al módulo Guild Ranking Basic y es configurable desde AdminCP.",
+  "minimum_core": "0.18.0",
+  "enabled_by_default": true,
+  "config_schema": [
+    {
+      "key": "page_limit",
+      "label": "Cantidad máxima de clanes",
+      "type": "integer",
+      "default": 100,
+      "min": 10,
+      "max": 200
+    },
+    {
+      "key": "default_sort",
+      "label": "Orden predeterminado",
+      "type": "select",
+      "default": "resets",
+      "options": {
+        "resets": "Total Resets",
+        "members": "Miembros",
+        "score": "Guild Score",
+        "name": "Nombre"
+      }
+    },
+    {
+      "key": "show_score",
+      "label": "Mostrar Guild Score",
+      "type": "boolean",
+      "default": true
+    },
+    {
+      "key": "show_notice",
+      "label": "Mostrar Notice",
+      "type": "boolean",
+      "default": true
+    },
+    {
+      "key": "show_member_preview",
+      "label": "Mostrar preview de miembros",
+      "type": "boolean",
+      "default": true
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+﻿[2026-09-18 17:53:40] 15% - Procesando allowlist
+[2026-09-18 17:53:40] 40% - Creando regla RDP restringida
+[2026-09-18 17:53:44] 90% - Verificando firewall
+[2026-09-18 17:53:46] 100% - Firewall configurado

@@ -1,0 +1,21 @@
+Options -Indexes
+DirectoryIndex index.php
+RewriteEngine On
+
+# Never expose application internals from a cPanel public_html deployment.
+RewriteRule ^(?:app|config|database|modules|storage|templates)(?:/|$) - [F,L,NC]
+RewriteRule ^install/lib(?:/|$) - [F,L,NC]
+
+# Protect secrets/backups/config files.
+<FilesMatch "(^\.|installed\.lock$|.*\.(?:log|sql|ini|bak|dist|example)$)">
+    Require all denied
+</FilesMatch>
+
+# Friendly installer URL.
+RewriteRule ^install/?$ install/index.php [QSA,L]
+
+# Existing public files/assets can be served through /public if explicitly requested.
+# All application routes go to the root front controller.
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [QSA,L]

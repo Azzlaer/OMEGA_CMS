@@ -1,0 +1,14 @@
+﻿{
+    "port":  3389,
+    "rule":  {
+                 "name":  "RDP Guard - Restricted",
+                 "enabled":  "True",
+                 "remoteAddress":  "26.77.224.126"
+             },
+    "ok":  true,
+    "disableGeneral":  false,
+    "type":  "firewall",
+    "allowed":  [
+                    "26.77.224.126"
+                ]
+}

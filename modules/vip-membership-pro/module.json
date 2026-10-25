@@ -1,0 +1,28 @@
+{
+  "name": "VIP Membership Pro",
+  "slug": "vip-membership-pro",
+  "version": "1.0.1",
+  "author": "LatinBattle.com / adaptación OmegaCMS del módulo WebEngine v1.1.2",
+  "description": "Membresías VIP con planes, descuentos, BBCode, compra transaccional, cuenta offline y adaptador nativo de créditos para OmegaCMS. Hotfix user.page compatible con ModuleRuntime.",
+  "minimum_core": "0.12.1",
+  "enabled_by_default": false,
+  "category": "account",
+  "user_menu": {
+    "label": "Membresías VIP",
+    "icon": "👑",
+    "order": 35
+  },
+  "actions": [
+    {
+      "key": "runtime_check",
+      "label": "Verificar runtime",
+      "help": "Confirma que Omega está ejecutando VIP Membership Pro v1.0.0."
+    },
+    {
+      "key": "diagnostics",
+      "label": "Diagnóstico de tablas",
+      "help": "Comprueba las tablas y columnas configuradas para VIP, créditos y estado online."
+    }
+  ],
+  "config_schema": []
+}

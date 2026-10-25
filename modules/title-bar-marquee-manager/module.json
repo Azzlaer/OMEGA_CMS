@@ -1,0 +1,23 @@
+{
+  "name": "Title Bar Marquee Manager Professional",
+  "slug": "title-bar-marquee-manager",
+  "version": "1.0.1",
+  "author": "LatinBattle.com / adaptación OmegaCMS del módulo WebEngine",
+  "description": "Anima el título de la pestaña del navegador con caracteres, palabras o rebote. Configuración completa desde AdminCP, sin jQuery y compatible con CSP. Hotfix PHP 8.2: elimina warning por use RuntimeException en namespace global.",
+  "minimum_core": "0.12.1",
+  "enabled_by_default": false,
+  "category": "visual",
+  "actions": [
+    {
+      "key": "runtime_check",
+      "label": "Verificar runtime",
+      "help": "Confirma que Omega está ejecutando Title Bar Marquee Manager Professional v1.0.0."
+    },
+    {
+      "key": "reset_defaults",
+      "label": "Restaurar valores por defecto",
+      "help": "Restablece la configuración original recomendada del módulo."
+    }
+  ],
+  "config_schema": []
+}

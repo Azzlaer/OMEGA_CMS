@@ -1,0 +1,28 @@
+{
+  "name": "Market Manager Professional",
+  "slug": "market-manager",
+  "version": "1.0.1",
+  "author": "LatinBattle.com / adaptación OmegaCMS del WebEngine Market Manager v0.4.4",
+  "description": "Mercado seguro entre jugadores con Warehouse 1920 bytes, publicaciones, multi-moneda, comisiones, bóveda de entregas y diagnóstico robusto. Hotfix: evita falsos negativos de Warehouse por filas NULL/no inicializadas.",
+  "minimum_core": "0.12.1",
+  "enabled_by_default": false,
+  "category": "commerce",
+  "user_menu": {
+    "label": "Mercado",
+    "icon": "🛒",
+    "order": 50
+  },
+  "actions": [
+    {
+      "key": "runtime_check",
+      "label": "Verificar runtime",
+      "help": "Confirma Market Manager Professional v1.0.0."
+    },
+    {
+      "key": "diagnostics",
+      "label": "Diagnóstico seguro",
+      "help": "Comprueba Warehouse, MEMB_STAT y mapeos de monedas."
+    }
+  ],
+  "config_schema": []
+}

@@ -1,0 +1,9 @@
+﻿{
+    "taskName":  "RDP Guard Anti-Bruteforce",
+    "whitelist":  "26.77.224.126",
+    "ok":  true,
+    "type":  "antibrute",
+    "threshold":  12,
+    "windowMinutes":  10,
+    "blockMinutes":  180
+}

@@ -1,0 +1,33 @@
+{
+  "name": "Inventario y Baúl Viewer — Kayito Sync",
+  "slug": "inventory-vault-viewer-kayito",
+  "version": "2.0.0",
+  "author": "LatinBattle.com / adaptación OmegaCMS del WebEngine v1.0.7 FINAL POLISH",
+  "description": "Versión limpia Kayito Sync: mismo decoder que el Python GUI, Item.txt autoritativo, listado completo Web de Type:Index, cobertura de reconocimiento y aislamiento de configuraciones/mappings antiguos.",
+  "minimum_core": "0.12.1",
+  "enabled_by_default": false,
+  "category": "account",
+  "user_menu": {
+    "label": "Inventario y Baúl",
+    "icon": "🎒",
+    "order": 45
+  },
+  "actions": [
+    {
+      "key": "runtime_check",
+      "label": "Verificar runtime",
+      "help": "Confirma runtime v2.0.0 Kayito Sync."
+    },
+    {
+      "key": "diagnostics",
+      "label": "Diagnóstico de estructura",
+      "help": "Comprueba DB, decoder /32 y cobertura del catálogo."
+    },
+    {
+      "key": "reseed_catalog",
+      "label": "Reparar catálogo",
+      "help": "Compatibilidad legado; el visor usa Item.txt integrado como autoridad."
+    }
+  ],
+  "config_schema": []
+}

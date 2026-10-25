@@ -1,0 +1,53 @@
+﻿{
+    "type":  "recovery",
+    "username":  "admin",
+    "steps":  [
+                  {
+                      "name":  "Usuario encontrado",
+                      "ok":  true,
+                      "detail":  "Admin"
+                  },
+                  {
+                      "name":  "Cuenta habilitada",
+                      "ok":  true,
+                      "detail":  "Cuenta habilitada."
+                  },
+                  {
+                      "name":  "Desbloqueo",
+                      "ok":  true,
+                      "detail":  "Estado de bloqueo limpiado por ADSI."
+                  },
+                  {
+                      "name":  "Politica de bloqueo",
+                      "ok":  true,
+                      "detail":  "Umbral=10, duracion=1, ventana=15"
+                  },
+                  {
+                      "name":  "RDP habilitado",
+                      "ok":  true,
+                      "detail":  "Puerto 3389, NLA=1"
+                  },
+                  {
+                      "name":  "TermService",
+                      "ok":  true,
+                      "detail":  "Running"
+                  },
+                  {
+                      "name":  "Grupo RDP",
+                      "ok":  true,
+                      "detail":  "Agregado/verificado en Remote Desktop Users"
+                  },
+                  {
+                      "name":  "Firewall recovery",
+                      "ok":  true,
+                      "detail":  "TCP 3389 permitido. Restringelo por IP despues de recuperar acceso."
+                  },
+                  {
+                      "name":  "Listener local",
+                      "ok":  false,
+                      "detail":  "TCP 3389 = False"
+                  }
+              ],
+    "generated":  "2026-09-18T17:43:40.7943742-03:00",
+    "listenerOk":  false
+}

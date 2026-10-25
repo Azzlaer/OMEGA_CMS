@@ -1,0 +1,112 @@
+{
+  "name": "Name Effects Professional",
+  "slug": "name-effects",
+  "version": "1.1.4",
+  "author": "LatinBattle.com / adaptación OmegaMU del módulo WebEngine",
+  "description": "Name Effects completo con 20 GIF, previews, DATEADD, activación unificada y carga cache-safe para LiteSpeed/OPcache.",
+  "minimum_core": "0.13.3",
+  "enabled_by_default": false,
+  "category": "visual",
+  "user_menu": {
+    "label": "Efectos de Nombre",
+    "icon": "✨",
+    "order": 30
+  },
+  "actions": [
+    {
+      "key": "cleanup_expired",
+      "label": "Limpiar efectos expirados",
+      "help": "Desactiva asignaciones cuya fecha ya venció."
+    },
+    {
+      "key": "runtime_check",
+      "label": "Verificar runtime v1.1.4",
+      "help": "Confirma que PHP está ejecutando el código actualizado del módulo."
+    }
+  ],
+  "config_schema": [
+    {
+      "key": "free_access",
+      "label": "Permitir usuarios normales",
+      "type": "boolean",
+      "default": true
+    },
+    {
+      "key": "vip_access",
+      "label": "Permitir usuarios VIP",
+      "type": "boolean",
+      "default": true
+    },
+    {
+      "key": "require_offline",
+      "label": "Exigir cuenta desconectada para comprar",
+      "type": "boolean",
+      "default": true
+    },
+    {
+      "key": "module_title",
+      "label": "Título",
+      "type": "text",
+      "default": "Efectos para tu Nombre",
+      "max_length": 120
+    },
+    {
+      "key": "module_description",
+      "label": "Descripción",
+      "type": "text",
+      "default": "Personaliza el nombre de tus personajes en la web.",
+      "max_length": 500
+    },
+    {
+      "key": "default_sample_text",
+      "label": "Texto de muestra",
+      "type": "text",
+      "default": "Azzlaer",
+      "max_length": 20
+    },
+    {
+      "key": "vip_min_level",
+      "label": "AccountLevel mínimo considerado VIP",
+      "type": "integer",
+      "default": 1,
+      "min": 1,
+      "max": 10
+    },
+    {
+      "key": "allow_zen",
+      "label": "Permitir costos en Zen",
+      "type": "boolean",
+      "default": true
+    },
+    {
+      "key": "allow_points",
+      "label": "Permitir costos en LevelUpPoint",
+      "type": "boolean",
+      "default": true
+    },
+    {
+      "key": "allow_level",
+      "label": "Permitir costos en niveles",
+      "type": "boolean",
+      "default": false
+    },
+    {
+      "key": "allow_resets",
+      "label": "Permitir costos en Resets",
+      "type": "boolean",
+      "default": false
+    },
+    {
+      "key": "allow_grandresets",
+      "label": "Permitir costos en Grand Reset",
+      "type": "boolean",
+      "default": false
+    },
+    {
+      "key": "allow_wcoinc",
+      "label": "Permitir costos en WCoinC si existe CashShopData",
+      "type": "boolean",
+      "default": true
+    }
+  ]
+}

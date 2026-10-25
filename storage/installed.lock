@@ -1,0 +1,9 @@
+{
+    "app_name": "SkynetMU",
+    "app_url": "http://skynetmu97k.localto.net",
+    "mu_database": "MuOnline97",
+    "cms_database": "MuOnline97",
+    "driver": "MuEmu 0.97k Kayito",
+    "admin": "Azzlaer",
+    "installed_at": "2026-08-14T04:57:55+00:00"
+}

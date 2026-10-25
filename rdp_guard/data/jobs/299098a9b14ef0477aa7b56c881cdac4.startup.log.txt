@@ -1,0 +1,7 @@
+At C:\Servidores\xampp\htdocs\rdp_guard\scripts\diagnostic.ps1:35 char:1
++ }
++ ~
+Unexpected token '}' in expression or statement.
+    + CategoryInfo          : ParserError: (:) [], ParentContainsErrorRecordException
+    + FullyQualifiedErrorId : UnexpectedToken
+ 

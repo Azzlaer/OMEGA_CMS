@@ -1,0 +1,28 @@
+{
+  "name": "Staff Profesional",
+  "slug": "staff-profesional",
+  "version": "2.0.0",
+  "author": "LatinBattle.com / adaptación OmegaCMS del WebEngine Staff Profesional v2.0.2",
+  "description": "Página profesional del Staff vinculada a personajes MuEmu: rangos, estado online, estadísticas, clan, mapa, contactos, filtros y administración completa.",
+  "minimum_core": "0.12.1",
+  "enabled_by_default": false,
+  "category": "community",
+  "user_menu": {
+    "label": "Staff Oficial",
+    "icon": "🛡️",
+    "order": 42
+  },
+  "actions": [
+    {
+      "key": "runtime_check",
+      "label": "Verificar runtime",
+      "help": "Confirma que Omega ejecuta Staff Profesional v2.0.0."
+    },
+    {
+      "key": "diagnostics",
+      "label": "Diagnóstico de tablas",
+      "help": "Comprueba Character, GuildMember, Guild, MEMB_STAT y las tablas internas del módulo."
+    }
+  ],
+  "config_schema": []
+}

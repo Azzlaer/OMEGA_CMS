@@ -1,0 +1,245 @@
+﻿{
+    "type":  "diagnostic",
+    "generated":  "2026-09-18T17:52:23.2005977-03:00",
+    "computer":  "VM-CBC7E271-CC0",
+    "processUser":  "NT AUTHORITY\\SYSTEM",
+    "sections":  {
+                     "privileges":  {
+                                        "identity":  "NT AUTHORITY\\SYSTEM",
+                                        "isAdministrator":  true
+                                    },
+                     "accountsPolicy":  {
+                                            "text":  "Force user logoff how long after time expires?:       Never\r\nMinimum password age (days):                          0\r\nMaximum password age (days):                          42\r\nMinimum password length:                              0\r\nLength of password history maintained:                None\r\nLockout threshold:                                    10\r\nLockout duration (minutes):                           10\r\nLockout observation window (minutes):                 10\r\nComputer role:                                        WORKSTATION\r\nThe command completed successfully."
+                                        },
+                     "localUsers":  [
+                                        {
+                                            "Name":  "Admin",
+                                            "Enabled":  true,
+                                            "LastLogon":  "\/Date(1789607778751)\/",
+                                            "PasswordExpires":  null,
+                                            "PasswordRequired":  false
+                                        },
+                                        {
+                                            "Name":  "Administrator",
+                                            "Enabled":  false,
+                                            "LastLogon":  null,
+                                            "PasswordExpires":  null,
+                                            "PasswordRequired":  true
+                                        },
+                                        {
+                                            "Name":  "DefaultAccount",
+                                            "Enabled":  false,
+                                            "LastLogon":  null,
+                                            "PasswordExpires":  null,
+                                            "PasswordRequired":  false
+                                        },
+                                        {
+                                            "Name":  "Guest",
+                                            "Enabled":  false,
+                                            "LastLogon":  null,
+                                            "PasswordExpires":  null,
+                                            "PasswordRequired":  false
+                                        },
+                                        {
+                                            "Name":  "WDAGUtilityAccount",
+                                            "Enabled":  false,
+                                            "LastLogon":  null,
+                                            "PasswordExpires":  "\/Date(1711261414501)\/",
+                                            "PasswordRequired":  true
+                                        }
+                                    ],
+                     "rdp":  {
+                                 "enabled":  true,
+                                 "port":  3389,
+                                 "nla":  1,
+                                 "securityLayer":  2,
+                                 "minEncryptionLevel":  2
+                             },
+                     "termService":  {
+                                         "Name":  "TermService",
+                                         "DisplayName":  "Remote Desktop Services",
+                                         "Status":  4,
+                                         "StartType":  2
+                                     },
+                     "listener":  {
+                                      "port":  3389,
+                                      "tcpTestSucceeded":  false
+                                  },
+                     "remoteDesktopUsers":  {
+                                                "Name":  "VM-CBC7E271-CC0\\Admin",
+                                                "ObjectClass":  "User",
+                                                "PrincipalSource":  1
+                                            },
+                     "firewall":  [
+                                      {
+                                          "name":  "Remote Desktop - User Mode (TCP-In)",
+                                          "enabled":  "False",
+                                          "action":  "Allow",
+                                          "direction":  "Inbound",
+                                          "protocol":  "TCP",
+                                          "localPort":  "3389",
+                                          "remoteAddress":  "Any"
+                                      },
+                                      {
+                                          "name":  "Remote Desktop - User Mode (UDP-In)",
+                                          "enabled":  "False",
+                                          "action":  "Allow",
+                                          "direction":  "Inbound",
+                                          "protocol":  "UDP",
+                                          "localPort":  "3389",
+                                          "remoteAddress":  "Any"
+                                      },
+                                      {
+                                          "name":  "Remote Desktop - Shadow (TCP-In)",
+                                          "enabled":  "False",
+                                          "action":  "Allow",
+                                          "direction":  "Inbound",
+                                          "protocol":  "TCP",
+                                          "localPort":  "Any",
+                                          "remoteAddress":  "Any"
+                                      },
+                                      {
+                                          "name":  "Remote Desktop - User Mode (TCP-In)",
+                                          "enabled":  "False",
+                                          "action":  "Allow",
+                                          "direction":  "Inbound",
+                                          "protocol":  "TCP",
+                                          "localPort":  "3389",
+                                          "remoteAddress":  "Any"
+                                      },
+                                      {
+                                          "name":  "Remote Desktop - User Mode (UDP-In)",
+                                          "enabled":  "False",
+                                          "action":  "Allow",
+                                          "direction":  "Inbound",
+                                          "protocol":  "UDP",
+                                          "localPort":  "3389",
+                                          "remoteAddress":  "Any"
+                                      },
+                                      {
+                                          "name":  "Remote Desktop - Shadow (TCP-In)",
+                                          "enabled":  "False",
+                                          "action":  "Allow",
+                                          "direction":  "Inbound",
+                                          "protocol":  "TCP",
+                                          "localPort":  "Any",
+                                          "remoteAddress":  "Any"
+                                      },
+                                      {
+                                          "name":  "RDP Guard - Recovery",
+                                          "enabled":  "False",
+                                          "action":  "Allow",
+                                          "direction":  "Inbound",
+                                          "protocol":  "TCP",
+                                          "localPort":  "3389",
+                                          "remoteAddress":  "Any"
+                                      },
+                                      {
+                                          "name":  "RDP Guard - Restricted",
+                                          "enabled":  "True",
+                                          "action":  "Allow",
+                                          "direction":  "Inbound",
+                                          "protocol":  "TCP",
+                                          "localPort":  "3389",
+                                          "remoteAddress":  "26.77.224.126"
+                                      },
+                                      {
+                                          "name":  "RDP Guard Block 190.230.51.162",
+                                          "enabled":  "True",
+                                          "action":  "Block",
+                                          "direction":  "Inbound",
+                                          "protocol":  "Any",
+                                          "localPort":  "Any",
+                                          "remoteAddress":  "190.230.51.162"
+                                      },
+                                      {
+                                          "name":  "RDP Guard Block 194.165.16.166",
+                                          "enabled":  "True",
+                                          "action":  "Block",
+                                          "direction":  "Inbound",
+                                          "protocol":  "Any",
+                                          "localPort":  "Any",
+                                          "remoteAddress":  "194.165.16.166"
+                                      },
+                                      {
+                                          "name":  "RDP Guard Block 91.238.181.94",
+                                          "enabled":  "True",
+                                          "action":  "Block",
+                                          "direction":  "Inbound",
+                                          "protocol":  "Any",
+                                          "localPort":  "Any",
+                                          "remoteAddress":  "91.238.181.94"
+                                      },
+                                      {
+                                          "name":  "RDP Guard Block 190.230.51.162",
+                                          "enabled":  "True",
+                                          "action":  "Block",
+                                          "direction":  "Inbound",
+                                          "protocol":  "Any",
+                                          "localPort":  "Any",
+                                          "remoteAddress":  "190.230.51.162"
+                                      },
+                                      {
+                                          "name":  "RDP Guard Block 194.165.16.166",
+                                          "enabled":  "True",
+                                          "action":  "Block",
+                                          "direction":  "Inbound",
+                                          "protocol":  "Any",
+                                          "localPort":  "Any",
+                                          "remoteAddress":  "194.165.16.166"
+                                      }
+                                  ],
+                     "lockouts":  [
+                                      {
+                                          "TimeCreated":  "\/Date(1789764232423)\/",
+                                          "Id":  4740,
+                                          "Message":  "A user account was locked out.\r\n\r\nSubject:\r\n\tSecurity ID:\t\tS-1-5-18\r\n\tAccount Name:\t\tVM-CBC7E271-CC0$\r\n\tAccount Domain:\t\tWORKGROUP\r\n\tLogon ID:\t\t0x3E7\r\n\r\nAccount That Was Locked Out:\r\n\tSecurity ID:\t\tS-1-5-21-3544513880-1471008820-287427128-1001\r\n\tAccount Name:\t\tAdmin\r\n\r\nAdditional Information:\r\n\tCaller Computer Name:\t"
+                                      },
+                                      {
+                                          "TimeCreated":  "\/Date(1789764168265)\/",
+                                          "Id":  4740,
+                                          "Message":  "A user account was locked out.\r\n\r\nSubject:\r\n\tSecurity ID:\t\tS-1-5-18\r\n\tAccount Name:\t\tVM-CBC7E271-CC0$\r\n\tAccount Domain:\t\tWORKGROUP\r\n\tLogon ID:\t\t0x3E7\r\n\r\nAccount That Was Locked Out:\r\n\tSecurity ID:\t\tS-1-5-21-3544513880-1471008820-287427128-1001\r\n\tAccount Name:\t\tAdmin\r\n\r\nAdditional Information:\r\n\tCaller Computer Name:\t"
+                                      },
+                                      {
+                                          "TimeCreated":  "\/Date(1789764158649)\/",
+                                          "Id":  4740,
+                                          "Message":  "A user account was locked out.\r\n\r\nSubject:\r\n\tSecurity ID:\t\tS-1-5-18\r\n\tAccount Name:\t\tVM-CBC7E271-CC0$\r\n\tAccount Domain:\t\tWORKGROUP\r\n\tLogon ID:\t\t0x3E7\r\n\r\nAccount That Was Locked Out:\r\n\tSecurity ID:\t\tS-1-5-21-3544513880-1471008820-287427128-500\r\n\tAccount Name:\t\tAdministrator\r\n\r\nAdditional Information:\r\n\tCaller Computer Name:\tB_107"
+                                      },
+                                      {
+                                          "TimeCreated":  "\/Date(1789763558670)\/",
+                                          "Id":  4740,
+                                          "Message":  "A user account was locked out.\r\n\r\nSubject:\r\n\tSecurity ID:\t\tS-1-5-18\r\n\tAccount Name:\t\tVM-CBC7E271-CC0$\r\n\tAccount Domain:\t\tWORKGROUP\r\n\tLogon ID:\t\t0x3E7\r\n\r\nAccount That Was Locked Out:\r\n\tSecurity ID:\t\tS-1-5-21-3544513880-1471008820-287427128-1001\r\n\tAccount Name:\t\tAdmin\r\n\r\nAdditional Information:\r\n\tCaller Computer Name:\t"
+                                      },
+                                      {
+                                          "TimeCreated":  "\/Date(1789763550846)\/",
+                                          "Id":  4740,
+                                          "Message":  "A user account was locked out.\r\n\r\nSubject:\r\n\tSecurity ID:\t\tS-1-5-18\r\n\tAccount Name:\t\tVM-CBC7E271-CC0$\r\n\tAccount Domain:\t\tWORKGROUP\r\n\tLogon ID:\t\t0x3E7\r\n\r\nAccount That Was Locked Out:\r\n\tSecurity ID:\t\tS-1-5-21-3544513880-1471008820-287427128-500\r\n\tAccount Name:\t\tAdministrator\r\n\r\nAdditional Information:\r\n\tCaller Computer Name:\t"
+                                      },
+                                      {
+                                          "TimeCreated":  "\/Date(1789762948741)\/",
+                                          "Id":  4740,
+                                          "Message":  "A user account was locked out.\r\n\r\nSubject:\r\n\tSecurity ID:\t\tS-1-5-18\r\n\tAccount Name:\t\tVM-CBC7E271-CC0$\r\n\tAccount Domain:\t\tWORKGROUP\r\n\tLogon ID:\t\t0x3E7\r\n\r\nAccount That Was Locked Out:\r\n\tSecurity ID:\t\tS-1-5-21-3544513880-1471008820-287427128-1001\r\n\tAccount Name:\t\tAdmin\r\n\r\nAdditional Information:\r\n\tCaller Computer Name:\t"
+                                      },
+                                      {
+                                          "TimeCreated":  "\/Date(1789762941641)\/",
+                                          "Id":  4740,
+                                          "Message":  "A user account was locked out.\r\n\r\nSubject:\r\n\tSecurity ID:\t\tS-1-5-18\r\n\tAccount Name:\t\tVM-CBC7E271-CC0$\r\n\tAccount Domain:\t\tWORKGROUP\r\n\tLogon ID:\t\t0x3E7\r\n\r\nAccount That Was Locked Out:\r\n\tSecurity ID:\t\tS-1-5-21-3544513880-1471008820-287427128-500\r\n\tAccount Name:\t\tAdministrator\r\n\r\nAdditional Information:\r\n\tCaller Computer Name:\t"
+                                      },
+                                      {
+                                          "TimeCreated":  "\/Date(1789762341151)\/",
+                                          "Id":  4740,
+                                          "Message":  "A user account was locked out.\r\n\r\nSubject:\r\n\tSecurity ID:\t\tS-1-5-18\r\n\tAccount Name:\t\tVM-CBC7E271-CC0$\r\n\tAccount Domain:\t\tWORKGROUP\r\n\tLogon ID:\t\t0x3E7\r\n\r\nAccount That Was Locked Out:\r\n\tSecurity ID:\t\tS-1-5-21-3544513880-1471008820-287427128-1001\r\n\tAccount Name:\t\tAdmin\r\n\r\nAdditional Information:\r\n\tCaller Computer Name:\t"
+                                      },
+                                      {
+                                          "TimeCreated":  "\/Date(1789762336061)\/",
+                                          "Id":  4740,
+                                          "Message":  "A user account was locked out.\r\n\r\nSubject:\r\n\tSecurity ID:\t\tS-1-5-18\r\n\tAccount Name:\t\tVM-CBC7E271-CC0$\r\n\tAccount Domain:\t\tWORKGROUP\r\n\tLogon ID:\t\t0x3E7\r\n\r\nAccount That Was Locked Out:\r\n\tSecurity ID:\t\tS-1-5-21-3544513880-1471008820-287427128-500\r\n\tAccount Name:\t\tAdministrator\r\n\r\nAdditional Information:\r\n\tCaller Computer Name:\t"
+                                      },
+                                      {
+                                          "TimeCreated":  "\/Date(1789761732931)\/",
+                                          "Id":  4740,
+                                          "Message":  "A user account was locked out.\r\n\r\nSubject:\r\n\tSecurity ID:\t\tS-1-5-18\r\n\tAccount Name:\t\tVM-CBC7E271-CC0$\r\n\tAccount Domain:\t\tWORKGROUP\r\n\tLogon ID:\t\t0x3E7\r\n\r\nAccount That Was Locked Out:\r\n\tSecurity ID:\t\tS-1-5-21-3544513880-1471008820-287427128-1001\r\n\tAccount Name:\t\tAdmin\r\n\r\nAdditional Information:\r\n\tCaller Computer Name:\t"
+                                      }
+                                  ]
+                 }
+}

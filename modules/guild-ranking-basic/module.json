@@ -1,0 +1,31 @@
+{
+  "name": "Guild Ranking Basic",
+  "slug": "guild-ranking-basic",
+  "version": "1.0.0",
+  "author": "Omega MU CMS",
+  "description": "Ranking público básico de clanes integrado en la sección Rankings.",
+  "minimum_core": "0.18.0",
+  "enabled_by_default": true,
+  "config_schema": [
+    {
+      "key": "page_limit",
+      "label": "Cantidad máxima de clanes",
+      "type": "integer",
+      "default": 100,
+      "min": 10,
+      "max": 200
+    },
+    {
+      "key": "show_score",
+      "label": "Mostrar Guild Score",
+      "type": "boolean",
+      "default": true
+    },
+    {
+      "key": "show_master",
+      "label": "Mostrar Guild Master",
+      "type": "boolean",
+      "default": true
+    }
+  ]
+}

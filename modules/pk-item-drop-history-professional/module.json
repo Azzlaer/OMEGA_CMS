@@ -1,0 +1,53 @@
+{
+  "name": "PK Item Drop History Professional",
+  "slug": "pk-item-drop-history-professional",
+  "version": "1.0.0",
+  "author": "Omega MU CMS",
+  "description": "Historial profesional de objetos perdidos por PK usando PKItemDropHistory.",
+  "minimum_core": "0.18.0",
+  "enabled_by_default": true,
+  "user_menu": {
+    "label": "PK Drop History",
+    "icon": "☠️",
+    "order": 36
+  },
+  "config_schema": [
+    {
+      "key": "history_limit",
+      "label": "Cantidad máxima de registros",
+      "type": "integer",
+      "default": 50,
+      "min": 10,
+      "max": 200,
+      "help": "Cantidad máxima de drops PK recientes a mostrar."
+    },
+    {
+      "key": "show_item_hex",
+      "label": "Mostrar Item HEX",
+      "type": "boolean",
+      "default": false,
+      "help": "Muestra la serialización HEX del item si la tabla la contiene."
+    },
+    {
+      "key": "show_map",
+      "label": "Mostrar mapa y posición",
+      "type": "boolean",
+      "default": true,
+      "help": "Muestra mapa y coordenadas cuando existen."
+    },
+    {
+      "key": "show_accounts",
+      "label": "Mostrar AccountID",
+      "type": "boolean",
+      "default": false,
+      "help": "Recomendado desactivado por privacidad."
+    },
+    {
+      "key": "show_item_details",
+      "label": "Mostrar detalles del item",
+      "type": "boolean",
+      "default": true,
+      "help": "Muestra index, level, excellent, skill, luck y option si están disponibles."
+    }
+  ]
+}

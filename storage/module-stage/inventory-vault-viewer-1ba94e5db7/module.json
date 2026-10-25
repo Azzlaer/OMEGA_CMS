@@ -1,0 +1,33 @@
+{
+  "name": "Inventario y Baúl Viewer",
+  "slug": "inventory-vault-viewer",
+  "version": "1.0.0",
+  "author": "LatinBattle.com / adaptación OmegaCMS del WebEngine v1.0.7 FINAL POLISH",
+  "description": "Visor de solo lectura para equipo, inventario y baúl MU Online, con skin clásico, catálogo de objetos, tamaños X/Y, GIFs, estadísticas, clan y estado online.",
+  "minimum_core": "0.12.1",
+  "enabled_by_default": false,
+  "category": "account",
+  "user_menu": {
+    "label": "Inventario y Baúl",
+    "icon": "🎒",
+    "order": 45
+  },
+  "actions": [
+    {
+      "key": "runtime_check",
+      "label": "Verificar runtime",
+      "help": "Confirma Inventario y Baúl Viewer v1.0.0."
+    },
+    {
+      "key": "diagnostics",
+      "label": "Diagnóstico de estructura",
+      "help": "Comprueba Character.Inventory, warehouse.Items, catálogo y formato 16/1920 bytes."
+    },
+    {
+      "key": "reseed_catalog",
+      "label": "Reparar catálogo",
+      "help": "Vuelve a cargar los 544 objetos del catálogo original si faltan datos."
+    }
+  ],
+  "config_schema": []
+}

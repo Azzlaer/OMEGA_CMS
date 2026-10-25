@@ -1,0 +1,56 @@
+#omega-rain-effect-root{
+    position:fixed;
+    inset:0;
+    pointer-events:none!important;
+    overflow:hidden;
+    contain:strict;
+    isolation:isolate
+}
+#omega-rain-effect-root.omega-rain-element{
+    position:absolute;
+    inset:0
+}
+.omega-rain-canvas{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    display:block;
+    pointer-events:none!important
+}
+.omega-rain-lightning{
+    position:absolute;
+    inset:0;
+    background:#fff;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .08s linear
+}
+.omega-rain-audio-control{
+    position:fixed;
+    right:14px;
+    bottom:14px;
+    z-index:99999;
+    width:38px;
+    height:38px;
+    border-radius:50%;
+    border:1px solid rgba(255,255,255,.25);
+    background:rgba(0,0,0,.68);
+    color:#fff;
+    font-size:17px;
+    line-height:36px;
+    text-align:center;
+    cursor:pointer;
+    box-shadow:0 4px 14px rgba(0,0,0,.3)
+}
+.omega-rain-audio-control:hover{background:rgba(20,20,20,.86)}
+@media(max-width:700px){
+    .omega-rain-audio-control{
+        right:8px;bottom:8px;width:34px;height:34px;line-height:32px
+    }
+}
+@media(prefers-reduced-motion:reduce){
+    #omega-rain-effect-root[data-respect-reduced-motion="1"]{
+        display:none!important
+    }
+}

@@ -1,0 +1,23 @@
+{
+  "name": "Rain Effect Manager Professional",
+  "slug": "rain-effect-manager",
+  "version": "1.0.0",
+  "author": "LatinBattle.com / adaptación OmegaCMS del módulo WebEngine",
+  "description": "Efecto de lluvia profesional con llovizna, tormenta, salpicaduras, relámpagos, audio opcional, optimización móvil y configuración completa desde AdminCP.",
+  "minimum_core": "0.12.1",
+  "enabled_by_default": false,
+  "category": "visual",
+  "actions": [
+    {
+      "key": "runtime_check",
+      "label": "Verificar runtime",
+      "help": "Confirma que Omega está ejecutando Rain Effect Manager Professional v1.0.0."
+    },
+    {
+      "key": "reset_defaults",
+      "label": "Restaurar valores por defecto",
+      "help": "Restablece la configuración recomendada del módulo."
+    }
+  ],
+  "config_schema": []
+}

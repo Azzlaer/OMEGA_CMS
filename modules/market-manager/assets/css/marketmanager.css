@@ -1,0 +1,117 @@
+
+.we-market{font-family:Arial,sans-serif;color:#ddd}
+.we-market-hero{display:flex;justify-content:space-between;align-items:center;padding:22px;margin-bottom:18px;border:1px solid #5c4718;border-radius:10px;background:linear-gradient(135deg,#17130d,#090909);box-shadow:0 10px 30px rgba(0,0,0,.32)}
+.we-market-hero h1{margin:3px 0 7px;color:#d9b85d;font-size:30px}
+.we-market-hero p{margin:0;color:#aaa}
+.we-market-kicker{color:#9e823d;font-size:12px;text-transform:uppercase;letter-spacing:1.5px}
+.we-market-notice{padding:13px 15px;margin-bottom:15px;border:1px solid #7b5d1a;border-radius:7px;background:#2a210d;color:#f1d889}
+.we-market-filter{display:grid;grid-template-columns:1fr 190px 110px;gap:9px;margin-bottom:18px}
+.we-market-filter input,.we-market-filter select,.we-market-filter button,.we-market-sell-form input,.we-market-sell-form select{min-height:42px;padding:8px 11px;border:1px solid #454545;border-radius:6px;background:#111;color:#eee}
+.we-market-filter button,.we-market-card button,.we-market-sell-form button{border:0;border-radius:6px;background:#8b1e1e;color:#fff;font-weight:700;cursor:pointer}
+.we-market-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(225px,1fr));gap:14px}
+.we-market-card{overflow:hidden;border:1px solid #3d3421;border-radius:9px;background:#111;box-shadow:0 8px 20px rgba(0,0,0,.24)}
+.we-market-item-icon{display:grid;place-items:center;height:110px;background:radial-gradient(circle,#302817,#0b0b0b);font-size:48px}
+.we-market-card-body{padding:14px}
+.we-market-card h3{margin:0 0 9px;color:#e2c66f;font-size:17px}
+.we-market-meta{display:flex;gap:7px;color:#aaa;font-size:12px}
+.we-market-serial,.we-market-seller{margin-top:7px;color:#888;font-size:12px}
+.we-market-price{margin:14px 0;color:#fff;font-size:20px;font-weight:800}
+.we-market-card button{width:100%;min-height:40px}
+.we-market-card button:disabled,.we-market-sell-form button:disabled{opacity:.45;cursor:not-allowed}
+.we-market-empty{grid-column:1/-1;padding:30px;text-align:center;border:1px dashed #444}
+.we-warehouse-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:9px;margin-bottom:18px}
+.we-warehouse-item{min-height:105px;padding:10px;border:1px solid #3b3425;border-radius:7px;background:#121212;color:#ddd;text-align:left;cursor:pointer}
+.we-warehouse-item:hover,.we-warehouse-item.is-selected{border-color:#d2ad4d;background:#211a0e}
+.we-warehouse-item span,.we-warehouse-item small{display:block;margin-top:5px;color:#9b9b9b}
+.we-market-sell-form{display:grid;grid-template-columns:1fr 180px 180px 190px;gap:10px;align-items:end;padding:16px;border:1px solid #40361e;border-radius:8px;background:#101010}
+.we-market-sell-form h3{grid-column:1/-1;margin:0;color:#d8b95c}
+.we-market-sell-form label{display:grid;gap:5px}
+.we-market-sell-form button{min-height:42px}
+.we-market-section-title{margin-top:25px;color:#d8b95c}
+.we-market-table-wrap{overflow:auto}
+.we-market-table{width:100%;border-collapse:collapse}
+.we-market-table th,.we-market-table td{padding:10px;border-bottom:1px solid #333;text-align:left}
+@media(max-width:760px){
+ .we-market-filter,.we-market-sell-form{grid-template-columns:1fr}
+ .we-market-sell-form h3{grid-column:auto}
+}
+
+.we-market-item-icon img{
+	max-width:94px;
+	max-height:94px;
+	object-fit:contain;
+	image-rendering:auto;
+	filter:drop-shadow(0 4px 8px rgba(0,0,0,.55))
+}
+.we-market-item-icon span{font-size:48px}
+.we-market-item-image{
+	display:grid;
+	place-items:center;
+	width:100%;
+	height:70px;
+	margin-bottom:8px;
+	border-radius:6px;
+	background:radial-gradient(circle,rgba(104,82,31,.32),rgba(0,0,0,.15))
+}
+.we-market-item-image img{
+	max-width:66px;
+	max-height:66px;
+	object-fit:contain;
+	filter:drop-shadow(0 3px 6px rgba(0,0,0,.65))
+}
+.we-market-item-image span{
+	display:grid;
+	place-items:center;
+	width:42px;
+	height:42px;
+	border:1px dashed #6d5c31;
+	border-radius:7px;
+	color:#8e805a;
+	font-size:22px
+}
+.we-warehouse-item.is-excellent{
+	border-color:#2f8f66;
+	box-shadow:inset 0 0 16px rgba(35,180,110,.12)
+}
+.we-warehouse-item.is-ancient{
+	border-color:#667bd3;
+	box-shadow:inset 0 0 16px rgba(85,110,220,.16)
+}
+.we-market-item-flags{
+	display:flex;
+	flex-wrap:wrap;
+	gap:5px;
+	margin-top:9px
+}
+.we-market-item-flags span{
+	padding:3px 6px;
+	border-radius:4px;
+	background:#292929;
+	color:#bbb;
+	font-size:10px;
+	text-transform:uppercase
+}
+.we-market-item-flags .excellent{background:#143d2d;color:#7be2ac}
+.we-market-item-flags .ancient{background:#262c57;color:#9eafff}
+.we-market-item-flags .harmony{background:#51350f;color:#ffd27d}
+
+.we-market-claim-form{margin:0}
+.we-market-claim-form button{
+	width:100%;
+	border:0;
+	border-radius:8px;
+	padding:12px 10px;
+	background:#207a45;
+	color:#fff;
+	font-weight:700;
+	cursor:pointer
+}
+.we-market-claim-form button:hover{background:#289658}
+
+.we-market-tabs{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 16px}
+.we-market-tabs a{padding:9px 12px;border:1px solid #3e3522;border-radius:7px;background:#101010;color:#c9c9c9;text-decoration:none}
+.we-market-tabs a.active{border-color:#c9a64d;color:#f0d67d;background:#211b0d}
+.we-market-message,.we-market-safe-note{padding:11px 13px;margin-bottom:14px;border-radius:7px}
+.we-market-message.success{border:1px solid #2c7245;background:#102019;color:#76d393}
+.we-market-message.error{border:1px solid #8b443b;background:#24110f;color:#e58a80}
+.we-market-safe-note{border:1px solid #5d512e;background:#18150d;color:#d8c98e}

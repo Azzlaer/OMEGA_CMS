@@ -1,0 +1,53 @@
+.we-vippro{max-width:1080px;margin:18px auto;color:#ddd}
+.vippro-hero{position:relative;display:flex;justify-content:space-between;gap:25px;overflow:hidden;padding:30px;border:1px solid #7a5b1a;border-radius:18px;background:radial-gradient(circle at 80% 20%,rgba(224,174,48,.2),transparent 34%),linear-gradient(135deg,#0b0b0b,#151106);box-shadow:0 18px 42px rgba(0,0,0,.35)}
+.vippro-eyebrow{display:block;color:#c99b31;font-size:10px;letter-spacing:2.3px}
+.vippro-hero h1{margin:8px 0;color:#f2c14e;font-size:32px}
+.vippro-hero p{max-width:680px;margin:0;color:#aaa}
+.vippro-balance{min-width:170px;padding:15px 18px;border:1px solid #4f3b11;border-radius:13px;background:rgba(0,0,0,.42);text-align:right}
+.vippro-balance small,.vippro-balance span{display:block;color:#8a8a8a;font-size:11px}
+.vippro-balance strong{display:block;color:#fff;font-size:27px}
+.vippro-status{display:flex;align-items:center;gap:15px;margin:18px 0;padding:16px 18px;border:1px solid #292929;border-radius:14px;background:#101010}
+.vippro-status.active{border-color:#73581c;background:linear-gradient(90deg,#171207,#0f0f0f)}
+.vippro-status-icon{display:flex;align-items:center;justify-content:center;width:52px;height:52px;border:1px solid #363636;border-radius:13px;background:#080808;font-size:25px}
+.vippro-status small,.vippro-status span{display:block;color:#8b8b8b;font-size:11px}
+.vippro-status strong{display:block;color:#eee;font-size:17px}
+.vippro-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.vippro-card{position:relative;overflow:hidden;min-height:345px;padding:24px;border:1px solid #333;border-radius:17px;background:linear-gradient(145deg,#111,#090909);box-shadow:0 14px 34px rgba(0,0,0,.28)}
+.vippro-card-glow{position:absolute;right:-70px;top:-70px;width:180px;height:180px;border-radius:50%;background:rgba(207,155,43,.15);filter:blur(15px)}
+.vip-type-2 .vippro-card-glow{background:rgba(135,167,190,.18)}
+.vip-type-3 .vippro-card-glow{background:rgba(234,189,70,.2)}
+.vip-type-4 .vippro-card-glow{background:rgba(172,100,221,.18)}
+.vippro-tier{position:relative}
+.vippro-tier span{display:block;color:#9a7a32;font-size:10px;letter-spacing:2px}
+.vippro-tier strong{display:block;margin-top:5px;color:#f0c14d;font-size:24px}
+.vippro-card p{position:relative;min-height:58px;color:#999}
+.vippro-duration{position:relative;margin:20px 0;padding:15px;border:1px solid #262626;border-radius:12px;background:#090909}
+.vippro-duration strong{display:block;color:#fff;font-size:30px}
+.vippro-duration span{color:#888;font-size:11px}
+.vippro-discount{display:inline-block;margin-bottom:12px;padding:5px 9px;border-radius:20px;background:#2d2510;color:#e5bd55;font-size:11px;font-weight:700}
+.vippro-price{display:flex;align-items:baseline;gap:8px;margin:12px 0 18px}
+.vippro-price strong{color:#fff;font-size:27px}
+.vippro-price span{color:#8c8c8c}
+.vippro-buy-form button{width:100%;padding:12px;border:1px solid #d5aa42;border-radius:10px;background:linear-gradient(#ddb54e,#b98722);color:#130f06;font-weight:800;cursor:pointer}
+.vippro-buy-form button:hover{filter:brightness(1.08)}
+.vippro-history{margin-top:22px;padding:22px;border:1px solid #292929;border-radius:16px;background:#0d0d0d}
+.vippro-history h2{margin-top:0;color:#e9bb4b}
+.vippro-history-list{display:grid;gap:8px}
+.vippro-history-row{display:grid;grid-template-columns:1fr 100px 150px 85px;gap:12px;padding:11px 12px;border:1px solid #222;border-radius:9px;background:#111}
+.vippro-history-row em{font-style:normal;font-weight:700}
+.vippro-history-row em.success{color:#58bd6a}
+.vippro-history-row em.failed{color:#dc6258}
+.vippro-error{display:flex;gap:16px;padding:23px;border:1px solid #8b6b22;border-radius:15px;background:linear-gradient(135deg,rgba(211,162,41,.14),transparent),#12100b}
+.vippro-error>div{font-size:30px}
+.vippro-error h2{margin:0 0 8px;color:#f0c355}
+.vippro-error p{margin:0 0 8px;color:#eee}
+.vippro-error small{color:#929292}
+.vippro-empty{padding:25px;border:1px dashed #555;border-radius:14px;text-align:center;color:#999}
+@media(max-width:950px){.vippro-grid{grid-template-columns:1fr 1fr}.vippro-hero{display:block}.vippro-balance{margin-top:18px;text-align:left}.vippro-history-row{grid-template-columns:1fr 1fr}}
+@media(max-width:650px){.vippro-grid{grid-template-columns:1fr}}
+.vippro-boot{padding:20px;border:1px solid #66501c;border-radius:12px;background:#15110a;color:#e2bd59}
+.vippro-card-icon{position:relative;font-size:42px;margin-bottom:12px}.vippro-tier-label{position:relative;color:#a98534;font-size:10px;letter-spacing:2px}.vippro-card h2{position:relative;margin:5px 0 10px;color:#f0c14d}.vippro-actions{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:15px}.vippro-info-button,.vippro-buy-form button{width:100%;padding:11px;border-radius:9px;font-weight:800;cursor:pointer}.vippro-info-button{border:1px solid #555;background:#151515;color:#eee}.accent-bronze{border-color:#86572d}.accent-silver{border-color:#8d9aa5}.accent-gold{border-color:#a88029}.accent-purple{border-color:#76508c}.accent-red{border-color:#8f3737}.accent-blue{border-color:#355e89}.vippro-modal{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;padding:20px}.vippro-modal.open{display:flex}.vippro-modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.82);backdrop-filter:blur(4px)}.vippro-modal-dialog{position:relative;z-index:1;width:min(720px,100%);max-height:85vh;overflow:auto;padding:28px;border:1px solid #8a6820;border-radius:17px;background:radial-gradient(circle at 85% 10%,rgba(225,175,48,.15),transparent 35%),#101010;box-shadow:0 25px 80px rgba(0,0,0,.65);color:#ddd}.vippro-modal-close{position:absolute;right:14px;top:12px;width:36px;height:36px;border:1px solid #444;border-radius:50%;background:#171717;color:#eee;font-size:23px;cursor:pointer}.vippro-modal-icon{font-size:42px}.vippro-modal-dialog h2{margin:7px 0 18px;color:#efc154}.vippro-modal-content{line-height:1.7;color:#d0d0d0}.vippro-modal-content a{color:#e4b746}.vippro-bb-center{text-align:center}.vippro-bb-list{padding-left:22px}body.vippro-modal-open{overflow:hidden}
+
+.vippro-message{margin:0 0 14px;padding:12px 14px;border-radius:9px}
+.vippro-message.success{border:1px solid #2f7c45;background:#102018;color:#79d393}
+.vippro-message.error{border:1px solid #8a483d;background:#24120f;color:#e58b7e}

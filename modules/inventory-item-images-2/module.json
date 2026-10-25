@@ -1,0 +1,18 @@
+{
+  "name": "Inventory Viewer - Item Images Pack 2/2",
+  "slug": "inventory-item-images-2",
+  "version": "1.0.0",
+  "author": "LatinBattle.com / adaptación OmegaCMS del pack WebEngine",
+  "description": "Parte 2 de 2 del pack de imágenes GIF para Inventario y Baúl Viewer. Contiene 473 GIF.",
+  "minimum_core": "0.12.1",
+  "enabled_by_default": false,
+  "category": "visual",
+  "actions": [
+    {
+      "key": "runtime_check",
+      "label": "Verificar pack",
+      "help": "Confirma que la parte 2/2 del pack está instalada."
+    }
+  ],
+  "config_schema": []
+}
