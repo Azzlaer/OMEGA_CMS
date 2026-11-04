@@ -2787,3 +2787,70 @@ body.omega-admin-enterprise{
 .omega-hcaptcha-head small{display:block;margin-top:2px;color:#708292;font-size:8px}
 .omega-hcaptcha-box .h-captcha{max-width:100%;overflow:hidden}
 @media(max-width:420px){.omega-hcaptcha-box{padding:10px}.omega-hcaptcha-box .h-captcha{transform:scale(.88);transform-origin:left top;margin-bottom:-8px}}
+
+
+/* v0.27.3 — hCaptcha Security Center */
+.admin-security-status-grid{
+    display:grid;
+    grid-template-columns:repeat(4,minmax(120px,1fr));
+    gap:9px;
+    margin:14px 0 10px;
+}
+.admin-security-status{
+    padding:12px;
+    border:1px solid #31404c;
+    border-radius:8px;
+    background:#0a1219;
+}
+.admin-security-status span{
+    display:block;
+    color:#718394;
+    font-size:8px;
+    font-weight:800;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+}
+.admin-security-status strong{
+    display:block;
+    margin-top:5px;
+    color:#cbd5dd;
+    font-size:11px;
+}
+.admin-security-status.ok{
+    border-color:rgba(65,210,145,.28);
+    background:rgba(38,150,102,.055);
+}
+.admin-security-status.ok strong{color:#73dfac}
+.admin-security-status.bad{
+    border-color:rgba(230,86,101,.28);
+    background:rgba(180,47,61,.055);
+}
+.admin-security-status.bad strong{color:#ee8e99}
+.admin-security-status.off strong{color:#8b9aaa}
+.admin-security-route-list{
+    display:flex;
+    flex-wrap:wrap;
+    gap:7px;
+    margin:10px 0 14px;
+}
+.admin-security-route-list span{
+    padding:5px 9px;
+    border:1px solid #30404c;
+    border-radius:999px;
+    background:#0a1219;
+    color:#708192;
+    font-size:8px;
+    font-weight:900;
+    text-transform:uppercase;
+}
+.admin-security-route-list span.enabled{
+    border-color:rgba(65,210,145,.28);
+    color:#73dfac;
+    background:rgba(38,150,102,.055);
+}
+@media(max-width:900px){
+    .admin-security-status-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:520px){
+    .admin-security-status-grid{grid-template-columns:1fr}
+}
