@@ -2742,3 +2742,38 @@ body.omega-admin-enterprise{
         padding:11px 12px!important;
     }
 }
+
+
+/* v0.27.1 — Visual Design Studio media actions */
+.design-upload-apply{
+    grid-column:1/-1;
+    margin-top:-4px;
+    padding:10px 12px;
+    border:1px solid #31414c;
+    border-radius:8px;
+    background:#0b141b;
+}
+.design-media-actions{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:7px;
+    margin-top:12px;
+}
+.design-media-actions form{margin:0}
+.design-media-actions .btn{
+    width:100%;
+    min-height:38px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+.design-media-actions .btn.danger{
+    border-color:#563038;
+    background:#1a1014;
+    color:#c98b95;
+}
+.design-media-actions .btn.danger:hover{
+    border-color:#8a414d;
+    background:#2b141a;
+    color:#ffadb9;
+}
