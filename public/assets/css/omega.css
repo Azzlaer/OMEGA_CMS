@@ -2329,20 +2329,20 @@ body.omega-admin-enterprise{
 .admin-v2-group-items{
     display:grid;
     grid-template-rows:0fr;
-    opacity:.2;
-    transition:grid-template-rows .2s ease,opacity .16s ease;
-}
-.admin-v2-group-items:before{
-    content:"";
-    min-height:0;
-}
-.admin-v2-group:not(.is-open) .admin-v2-group-items{
-    display:none;
+    opacity:.35;
+    transition:grid-template-rows .22s ease,opacity .18s ease;
 }
 .admin-v2-group.is-open .admin-v2-group-items{
-    display:grid;
     grid-template-rows:1fr;
     opacity:1;
+}
+.admin-v2-group-items-inner{
+    min-height:0;
+    overflow:hidden;
+    padding:0 2px;
+}
+.admin-v2-group.is-open .admin-v2-group-items-inner{
+    padding-bottom:5px;
 }
 .admin-v2-nav-item{
     position:relative;
@@ -2664,7 +2664,7 @@ body.omega-admin-enterprise{
     background:#0b141c;
 }
 .sidebar-compact .admin-v2-group-items{
-    display:grid!important;
+    grid-template-rows:1fr!important;
     opacity:1!important;
 }
 .sidebar-compact .admin-v2-nav-item{
