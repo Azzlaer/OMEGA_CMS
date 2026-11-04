@@ -39,6 +39,7 @@ use Omega\Services\DesignStudio;
 use Omega\Services\GuildRankingProfessional;
 use Omega\Services\GuideManager;
 use Omega\Services\MonetizationCenter;
+use Omega\Services\HCaptchaService;
 use Omega\Core\Csrf;
 use Omega\Core\RateLimiter;
 
@@ -79,7 +80,8 @@ $guideManager = new GuideManager($cmsDb,$root);
 $guideManager->ensureSchema();
 $monetization = new MonetizationCenter($cmsDb);
 $monetization->ensureSchema();
-Security::headers($monetization->securityGoogleEnabled());
+$hcaptcha = new HCaptchaService();
+Security::headers($monetization->securityGoogleEnabled(),$hcaptcha->enabled());
 $appName = (string)($appConfig['name'] ?? 'Omega MU');
 $modules = (new ModuleManager($root.'/modules'))->discover();
 
@@ -431,6 +433,16 @@ try {
             $requireCsrf();
             $old['username'] = trim((string)($_POST['username'] ?? ''));
             try {
+                if($hcaptcha->enabled()){
+                    $verified=$hcaptcha->verify(
+                        (string)($_POST['h-captcha-response']??''),
+                        $clientIp
+                    );
+                    if(!$verified){
+                        throw new RuntimeException('HCAPTCHA_FAILED');
+                    }
+                }
+
                 $auth->login(
                     (string)($_POST['username'] ?? ''),
                     (string)($_POST['password'] ?? ''),
@@ -442,13 +454,20 @@ try {
                 $_SESSION['_flash_success'] = 'Sesión iniciada correctamente.';
                 $redirect('/account');
             } catch (Throwable $e) {
-                $error = $e->getMessage();
+                $code=$e->getMessage();
+                if(str_starts_with($code,'HCAPTCHA_')){
+                    $error=$hcaptcha->friendlyError($code);
+                }else{
+                    $error=$code;
+                }
             }
         }
 
         echo renderPage($root,$appName,$driver,$auth,$adminAccess,'login',[
             'title'=>'Mi Cuenta','active'=>'account','error'=>$error,'old'=>$old,
-            'success'=>$flashSuccess
+            'success'=>$flashSuccess,
+            'hcaptchaEnabled'=>$hcaptcha->enabled(),
+            'hcaptchaSiteKey'=>$hcaptcha->siteKey()
         ]);
         exit;
     }
