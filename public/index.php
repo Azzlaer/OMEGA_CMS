@@ -1353,14 +1353,46 @@ try {
             $adminAccess->requireSuperAdmin($accountId);
             $requireCsrf();
             try{
-                $designStudio->upload(
+                $assetId=$designStudio->upload(
                     $_FILES['media']??[],
                     (string)($_POST['label']??''),
                     $accountId
                 );
-                $_SESSION['_flash_success']='Archivo agregado a la Biblioteca Multimedia.';
+
+                if(!empty($_POST['use_as_global_background']) && $assetId>0){
+                    $designStudio->useAsGlobalBackground($assetId);
+                    $_SESSION['_flash_success']='Archivo subido y aplicado como nuevo fondo global.';
+                }else{
+                    $_SESSION['_flash_success']='Archivo agregado a la Biblioteca Multimedia.';
+                }
             }catch(Throwable $e){
-                $_SESSION['_flash_error']=$e->getMessage();
+                $message=$e->getMessage();
+                $friendly=[
+                    'MEDIA_UPLOAD_FAILED_1'=>'El archivo supera el límite upload_max_filesize configurado en PHP.',
+                    'MEDIA_UPLOAD_FAILED_2'=>'El archivo supera el tamaño máximo permitido por el formulario.',
+                    'MEDIA_UPLOAD_FAILED_3'=>'La subida quedó incompleta. Inténtalo nuevamente.',
+                    'MEDIA_UPLOAD_FAILED_4'=>'No se recibió ningún archivo.',
+                    'MEDIA_UPLOAD_FAILED_6'=>'PHP no encuentra su carpeta temporal de uploads.',
+                    'MEDIA_UPLOAD_FAILED_7'=>'PHP no pudo escribir el archivo en disco.',
+                    'MEDIA_UPLOAD_FAILED_8'=>'Una extensión de PHP detuvo la subida.',
+                    'MEDIA_TYPE_NOT_ALLOWED'=>'Formato no permitido. Usa JPG, PNG, WEBP, GIF, MP4 o WEBM.',
+                    'IMAGE_TOO_LARGE'=>'La imagen supera 12 MB.',
+                    'VIDEO_TOO_LARGE'=>'El video supera 60 MB.',
+                    'IMAGE_DIMENSIONS_INVALID'=>'La imagen debe medir entre 320×120 y 7680×4320 píxeles.',
+                ];
+                $_SESSION['_flash_error']=$friendly[$message]??$message;
+            }
+            $redirect('/admin/design-studio#library');
+        }
+
+        if ($path === '/admin/design-studio/asset/use-global' && $method === 'POST') {
+            $adminAccess->requireSuperAdmin($accountId);
+            $requireCsrf();
+            try{
+                $designStudio->useAsGlobalBackground((int)($_POST['asset_id']??0));
+                $_SESSION['_flash_success']='Fondo global actualizado correctamente.';
+            }catch(Throwable $e){
+                $_SESSION['_flash_error']='No se pudo aplicar la imagen: '.$e->getMessage();
             }
             $redirect('/admin/design-studio#library');
         }
