@@ -206,6 +206,7 @@ final class MonetizationCenter
         $consent=$this->consentState();
         $analyticsAllowed=$s['consent_enabled']!=='1' || $consent['analytics'];
         $adsAllowed=$s['consent_enabled']!=='1' || $consent['ads'];
+        $personalizationAllowed=$s['consent_enabled']!=='1' || $consent['personalization'];
 
         return [
             'enabled'=>$enabled,
@@ -213,7 +214,8 @@ final class MonetizationCenter
             'consent'=>$consent,
             'analyticsAllowed'=>$analyticsAllowed,
             'adsAllowed'=>$adsAllowed,
-            'headHtml'=>$enabled ? $this->headHtml($s,$analyticsAllowed,$adsAllowed) : '',
+            'personalizationAllowed'=>$personalizationAllowed,
+            'headHtml'=>$enabled ? $this->headHtml($s,$analyticsAllowed,$adsAllowed,$personalizationAllowed) : '',
             'showConsent'=>$enabled && $s['consent_enabled']==='1' && !$consent['decided'],
             'path'=>$path,
             'loggedAccount'=>$accountId,
@@ -264,17 +266,25 @@ final class MonetizationCenter
         return $content."\n";
     }
 
-    private function headHtml(array $s, bool $analyticsAllowed, bool $adsAllowed): string
+    private function headHtml(array $s, bool $analyticsAllowed, bool $adsAllowed, bool $personalizationAllowed): string
     {
         $html=[];
         $gtm=(string)$s['gtm_id'];
         $ga=(string)$s['ga4_id'];
         $aw=(string)$s['google_ads_id'];
 
-        if ($analyticsAllowed) {
-            if ($gtm!=='') $html[]='<meta name="omega-gtm-id" content="'.Security::e($gtm).'">';
-            if ($ga!=='') $html[]='<meta name="omega-ga4-id" content="'.Security::e($ga).'">';
-            if ($aw!=='') $html[]='<meta name="omega-google-ads-id" content="'.Security::e($aw).'">';
+        $html[]='<meta name="omega-consent-analytics" content="'.($analyticsAllowed?'1':'0').'">';
+        $html[]='<meta name="omega-consent-ads" content="'.($adsAllowed?'1':'0').'">';
+        $html[]='<meta name="omega-consent-personalization" content="'.($personalizationAllowed?'1':'0').'">';
+
+        if ($gtm!=='' && $analyticsAllowed && $adsAllowed) {
+            $html[]='<meta name="omega-gtm-id" content="'.Security::e($gtm).'">';
+        }
+        if ($ga!=='' && $analyticsAllowed) {
+            $html[]='<meta name="omega-ga4-id" content="'.Security::e($ga).'">';
+        }
+        if ($aw!=='' && $adsAllowed) {
+            $html[]='<meta name="omega-google-ads-id" content="'.Security::e($aw).'">';
         }
         if ((string)($s['google_site_verification']??'')!=='') {
             $html[]='<meta name="google-site-verification" content="'.Security::e((string)$s['google_site_verification']).'">';
