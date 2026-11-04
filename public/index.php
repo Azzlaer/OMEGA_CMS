@@ -433,10 +433,11 @@ try {
             $requireCsrf();
             $old['username'] = trim((string)($_POST['username'] ?? ''));
             try {
-                if($hcaptcha->enabled()){
+                if($hcaptcha->protects('login')){
                     $verified=$hcaptcha->verify(
                         (string)($_POST['h-captcha-response']??''),
-                        $clientIp
+                        $clientIp,
+                        'login'
                     );
                     if(!$verified){
                         throw new RuntimeException('HCAPTCHA_FAILED');
@@ -456,7 +457,7 @@ try {
             } catch (Throwable $e) {
                 $code=$e->getMessage();
                 if(str_starts_with($code,'HCAPTCHA_')){
-                    $error=$hcaptcha->friendlyError($code);
+                    $error=$hcaptcha->friendlyError($code,'login');
                 }else{
                     $error=$code;
                 }
@@ -466,7 +467,7 @@ try {
         echo renderPage($root,$appName,$driver,$auth,$adminAccess,'login',[
             'title'=>'Mi Cuenta','active'=>'account','error'=>$error,'old'=>$old,
             'success'=>$flashSuccess,
-            'hcaptchaEnabled'=>$hcaptcha->enabled(),
+            'hcaptchaEnabled'=>$hcaptcha->protects('login'),
             'hcaptchaSiteKey'=>$hcaptcha->siteKey()
         ]);
         exit;
@@ -485,17 +486,35 @@ try {
                 'personal_id'=>trim((string)($_POST['personal_id'] ?? '')),
             ];
             try {
+                if($hcaptcha->protects('register')){
+                    $verified=$hcaptcha->verify(
+                        (string)($_POST['h-captcha-response']??''),
+                        $clientIp,
+                        'register'
+                    );
+                    if(!$verified){
+                        throw new RuntimeException('HCAPTCHA_FAILED');
+                    }
+                }
+
                 $created = $auth->register($_POST, $clientIp);
                 $_SESSION['_flash_success'] = 'Cuenta '.$created.' creada correctamente. Ya puedes iniciar sesión.';
                 $redirect('/login');
             } catch (Throwable $e) {
-                $error = $e->getMessage();
+                $code=$e->getMessage();
+                if(str_starts_with($code,'HCAPTCHA_')){
+                    $error=$hcaptcha->friendlyError($code,'register');
+                }else{
+                    $error=$code;
+                }
             }
         }
 
         echo renderPage($root,$appName,$driver,$auth,$adminAccess,'register',[
             'title'=>'Crear Cuenta','active'=>'account','error'=>$error,'old'=>$old,'appName'=>$appName,
-            'moduleAssets'=>$moduleRuntime->assetsFor('register')
+            'moduleAssets'=>$moduleRuntime->assetsFor('register'),
+            'hcaptchaEnabled'=>$hcaptcha->protects('register'),
+            'hcaptchaSiteKey'=>$hcaptcha->siteKey()
         ]);
         exit;
     }
@@ -1512,7 +1531,10 @@ try {
                 $adminManager->saveSettings($_POST);
                 $redirect('/admin/settings');
             }
-            $renderAdmin('Configuración','settings','admin_settings',['settings'=>$adminManager->settings()]);
+            $renderAdmin('Configuración','settings','admin_settings',[
+                'settings'=>$adminManager->settings(),
+                'hcaptchaDiagnostic'=>$hcaptcha->diagnostic()
+            ]);
             exit;
         }
 
