@@ -38,6 +38,7 @@ $groups=[
         'label'=>'PLATAFORMA',
         'items'=>[
             ['design-studio','/admin/design-studio','🎨','Visual Design Studio','super'],
+            ['monetization','/admin/monetization','💰','Google & Monetization','super'],
             ['access','/admin/access','♛','Acceso Admin','super'],
             ['settings','/admin/settings','⚙','Configuración'],
         ],
@@ -111,9 +112,10 @@ foreach($groups as $gk=>$group){
                                 ($key==='modules'?'Extensiones instalables':
                                 ($key==='database-features'?'Datos del GameServer':
                                 ($key==='design-studio'?'Apariencia del sitio':
+                                ($key==='monetization'?'Google, Ads y privacidad':
                                 ($key==='access'?'Permisos administrativos':
                                 ($key==='visuals'?'Recursos visuales':
-                                ($key==='ranking-exclusions'?'Filtros públicos':'Opciones del CMS')))))))))))
+                                ($key==='ranking-exclusions'?'Filtros públicos':'Opciones del CMS'))))))))))))
                             ?></small>
                         </span>
                         <span class="admin-nav-chevron">›</span>
