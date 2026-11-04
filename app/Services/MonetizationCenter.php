@@ -268,20 +268,14 @@ final class MonetizationCenter
         $gtm=(string)$s['gtm_id'];
         $ga=(string)$s['ga4_id'];
         $aw=(string)$s['google_ads_id'];
-        if ($analyticsAllowed && $gtm!=='') {
-            $html[]='<script async src="https://www.googletagmanager.com/gtag/js?id='.rawurlencode($gtm).'"></script>';
-            $html[]='<meta name="omega-google-tag" content="'.Security::e($gtm).'">';
-        } elseif ($analyticsAllowed && ($ga!=='' || $aw!=='')) {
-            $id=$ga!==''?$ga:$aw;
-            $html[]='<script async src="https://www.googletagmanager.com/gtag/js?id='.rawurlencode($id).'"></script>';
-            $html[]='<meta name="omega-google-tag" content="'.Security::e($id).'">';
+
+        if ($analyticsAllowed) {
+            if ($gtm!=='') $html[]='<meta name="omega-gtm-id" content="'.Security::e($gtm).'">';
             if ($ga!=='') $html[]='<meta name="omega-ga4-id" content="'.Security::e($ga).'">';
             if ($aw!=='') $html[]='<meta name="omega-google-ads-id" content="'.Security::e($aw).'">';
         }
         if ($adsAllowed && $s['adsense_client']!=='') {
-            $client=Security::e((string)$s['adsense_client']);
-            $html[]='<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='.$client.'" crossorigin="anonymous"></script>';
-            $html[]='<meta name="omega-adsense-client" content="'.$client.'">';
+            $html[]='<meta name="omega-adsense-client" content="'.Security::e((string)$s['adsense_client']).'">';
         }
         return implode("\n",$html);
     }
