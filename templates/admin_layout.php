@@ -126,6 +126,7 @@ $initial=strtoupper(substr($adminName!==''?$adminName:'A',0,1));
                     </button>
 
                     <div class="admin-v2-group-items" data-group-items>
+                        <div class="admin-v2-group-items-inner">
                         <?php foreach($visibleItems as $item):
                             [$key,$href,$icon,$label,$description]=$item;
                         ?>
@@ -140,6 +141,7 @@ $initial=strtoupper(substr($adminName!==''?$adminName:'A',0,1));
                             <span class="admin-nav-chevron admin-v2-nav-arrow">›</span>
                         </a>
                         <?php endforeach; ?>
+                        </div>
                     </div>
                 </section>
             <?php endforeach; ?>
