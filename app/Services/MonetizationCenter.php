@@ -105,11 +105,23 @@ final class MonetizationCenter
         foreach ($values as $key=>$value) {
             $this->db->execute("
                 MERGE dbo.cms_monetization_settings AS target
-                USING (SELECT :setting_key AS setting_key) AS source
+                USING (
+                    SELECT
+                        CAST(:source_key AS VARCHAR(120)) AS setting_key,
+                        CAST(:source_value AS NVARCHAR(MAX)) AS setting_value
+                ) AS source
                 ON target.setting_key=source.setting_key
-                WHEN MATCHED THEN UPDATE SET setting_value=:setting_value,updated_at=SYSUTCDATETIME()
-                WHEN NOT MATCHED THEN INSERT(setting_key,setting_value) VALUES(source.setting_key,:setting_value);
-            ",['setting_key'=>$key,'setting_value'=>$value]);
+                WHEN MATCHED THEN
+                    UPDATE SET
+                        setting_value=source.setting_value,
+                        updated_at=SYSUTCDATETIME()
+                WHEN NOT MATCHED THEN
+                    INSERT(setting_key,setting_value)
+                    VALUES(source.setting_key,source.setting_value);
+            ",[
+                'source_key'=>$key,
+                'source_value'=>$value
+            ]);
         }
     }
 
