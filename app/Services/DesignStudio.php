@@ -401,7 +401,7 @@ final class DesignStudio
         );
     }
 
-    public function upload(array $file,string $label,string $actor): void
+    public function upload(array $file,string $label,string $actor): int
     {
         $this->ensureSchema();
 
@@ -486,6 +486,42 @@ final class DesignStudio
                 'created_by'=>$actor,
             ]
         );
+
+        $row=$this->db->fetchOne(
+            "SELECT TOP 1 id FROM dbo.cms_design_assets
+              WHERE file_name=:file_name
+              ORDER BY id DESC",
+            ['file_name'=>$name]
+        );
+
+        return (int)($row['id']??0);
+    }
+
+    public function useAsGlobalBackground(int $id): void
+    {
+        $asset=$this->asset($id);
+        if(!$asset || ($asset['media_type']??'')!=='image'){
+            throw new RuntimeException('La imagen seleccionada no existe o no es un recurso gráfico válido.');
+        }
+
+        $sections=$this->sections();
+        $global=$sections['global']??[
+            'enabled'=>1,
+            'overlay_opacity'=>55,
+            'rotation_seconds'=>0,
+            'background_position'=>'center center'
+        ];
+
+        $this->saveSection([
+            'section_key'=>'global',
+            'enabled'=>'1',
+            'background_mode'=>'image',
+            'asset_id'=>$id,
+            'random_asset_ids'=>[],
+            'rotation_seconds'=>(int)($global['rotation_seconds']??0),
+            'overlay_opacity'=>(int)($global['overlay_opacity']??55),
+            'background_position'=>(string)($global['background_position']??'center center'),
+        ]);
     }
 
     public function deleteAsset(int $id): void
@@ -501,60 +537,62 @@ final class DesignStudio
             throw new RuntimeException('ASSET_NOT_FOUND');
         }
 
+        /*
+         * v0.27.1:
+         * Eliminar desde la Biblioteca ahora también desasocia el recurso.
+         * Antes se bloqueaba el borrado si la imagen estaba siendo usada como
+         * Hero, fondo fijo o parte de una colección aleatoria, dejando al
+         * administrador sin forma intuitiva de reemplazarla.
+         */
         $settings=$this->settings();
-
         if((int)($settings['hero_asset_id']??0)===$id){
-            throw new RuntimeException(
-                'No se puede eliminar: este archivo está siendo usado por el Header / Hero.'
-            );
+            $settings['hero_enabled']='0';
+            $settings['hero_mode']='none';
+            $settings['hero_asset_id']='0';
+            $this->saveSettings($settings);
         }
 
-        foreach($this->sections() as $section){
-            if((int)($section['asset_id']??0)===$id){
-                throw new RuntimeException(
-                    'No se puede eliminar: este archivo está asignado a la sección '.
-                    ($section['label']??$section['section_key']).'.'
-                );
+        foreach($this->sections() as $sectionKey=>$section){
+            $changed=false;
+            $mode=(string)($section['background_mode']??'inherit');
+            $assetId=(int)($section['asset_id']??0);
+            $randomIds=array_values(array_filter(
+                array_map('intval',$section['random_asset_ids']??[]),
+                static fn(int $assetId): bool => $assetId!==$id
+            ));
+
+            if($assetId===$id){
+                $assetId=0;
+                $mode=$sectionKey==='global' ? 'default' : 'inherit';
+                $changed=true;
             }
 
-            if(in_array($id,$section['random_asset_ids']??[],true)){
-                throw new RuntimeException(
-                    'No se puede eliminar: este archivo forma parte de la colección aleatoria de '.
-                    ($section['label']??$section['section_key']).'.'
-                );
+            if(count($randomIds)!==count($section['random_asset_ids']??[])){
+                if($mode==='random' && !$randomIds){
+                    $mode=$sectionKey==='global' ? 'default' : 'inherit';
+                }
+                $changed=true;
+            }
+
+            if($changed){
+                $this->saveSection([
+                    'section_key'=>$sectionKey,
+                    'enabled'=>!empty($section['enabled'])?'1':'0',
+                    'background_mode'=>$mode,
+                    'asset_id'=>$assetId,
+                    'random_asset_ids'=>$randomIds,
+                    'rotation_seconds'=>(int)($section['rotation_seconds']??0),
+                    'overlay_opacity'=>(int)($section['overlay_opacity']??55),
+                    'background_position'=>(string)($section['background_position']??'center center'),
+                ]);
             }
         }
 
         $publicPath=(string)($asset['public_path']??'');
-
-        /*
-         * En v0.24.0 los assets se guardaron como:
-         *   /public/uploads/design/archivo.ext
-         *
-         * El filesystem real es:
-         *   {root}/public/uploads/design/archivo.ext
-         *
-         * Normalizamos el path y jamás usamos la ruta completa proveniente de DB
-         * para evitar traversal.
-         */
         $fileName=basename((string)($asset['file_name']??basename($publicPath)));
 
         if(!preg_match('/^[A-Za-z0-9._-]+$/',$fileName)){
             throw new RuntimeException('ASSET_FILENAME_INVALID');
-        }
-
-        $filePath=$this->root.'/public/uploads/design/'.$fileName;
-
-        /*
-         * Primero se elimina el archivo físico. Si existe y no puede borrarse,
-         * NO eliminamos el registro SQL para no dejar un archivo huérfano.
-         */
-        if(is_file($filePath)){
-            if(!@unlink($filePath)){
-                throw new RuntimeException(
-                    'No fue posible eliminar el archivo físico. Revisa permisos de public/uploads/design.'
-                );
-            }
         }
 
         $affected=$this->db->execute(
@@ -564,6 +602,13 @@ final class DesignStudio
 
         if($affected<1){
             throw new RuntimeException('No fue posible eliminar el registro de la Biblioteca Multimedia.');
+        }
+
+        $filePath=$this->root.'/public/uploads/design/'.$fileName;
+        if(is_file($filePath) && !@unlink($filePath)){
+            throw new RuntimeException(
+                'El recurso fue desasociado y eliminado de la Biblioteca, pero no se pudo borrar el archivo físico. Revisa permisos de public/uploads/design.'
+            );
         }
     }
 
