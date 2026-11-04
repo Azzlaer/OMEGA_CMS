@@ -4,13 +4,28 @@ namespace Omega\Core;
 
 final class Security
 {
-    public static function headers(): void
+    public static function headers(bool $googleServices=false): void
     {
         header('X-Content-Type-Options: nosniff');
         header('Referrer-Policy: strict-origin-when-cross-origin');
         header('Permissions-Policy: geolocation=(), microphone=(), camera=()');
-        header("Content-Security-Policy: default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; script-src 'self'; frame-src https://www.youtube.com https://youtube.com https://www.youtube-nocookie.com https://youtube-nocookie.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'");
+
+        $script="'self'";
+        $connect="'self'";
+        $frame="https://www.youtube.com https://youtube.com https://www.youtube-nocookie.com https://youtube-nocookie.com";
+
+        if ($googleServices) {
+            $script.=" https://www.googletagmanager.com https://pagead2.googlesyndication.com https://www.googleadservices.com https://googleads.g.doubleclick.net";
+            $connect.=" https://www.google-analytics.com https://region1.google-analytics.com https://analytics.google.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net";
+            $frame.=" https://googleads.g.doubleclick.net https://tpc.googlesyndication.com";
+        }
+
+        header("Content-Security-Policy: default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; script-src {$script}; connect-src {$connect}; frame-src {$frame}; frame-ancestors 'none'; base-uri 'self'; form-action 'self'");
         header('X-Frame-Options: DENY');
     }
-    public static function e(mixed $value): string { return htmlspecialchars((string)$value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); }
+
+    public static function e(mixed $value): string
+    {
+        return htmlspecialchars((string)$value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+    }
 }
