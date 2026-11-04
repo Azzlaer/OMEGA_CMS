@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const gtm=meta('omega-gtm-id');
     const ga4=meta('omega-ga4-id');
     const adsId=meta('omega-google-ads-id');
-    const adsense=meta('omega-adsense-client');
+    const adsense=meta('omega-adsense-client') || document.querySelector('ins.adsbygoogle')?.dataset.adClient || '';
 
     window.dataLayer = window.dataLayer || [];
 
