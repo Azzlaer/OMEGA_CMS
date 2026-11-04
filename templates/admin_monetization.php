@@ -7,19 +7,11 @@ $rows=$rows??[];
 $item=$item??[];
 $edit=!empty($item['id']);
 $placements=[
- 'global_header'=>'Global · antes del contenido',
+ 'global_header'=>'Global · después del header',
  'below_navigation'=>'Debajo de navegación',
  'content_top'=>'Inicio del contenido',
  'content_bottom'=>'Final del contenido',
- 'global_footer'=>'Antes del footer',
- 'home_after_news'=>'Inicio · después de noticias',
- 'rankings_top'=>'Rankings · superior',
- 'rankings_bottom'=>'Rankings · inferior',
- 'guides_top'=>'Guías · superior',
- 'guides_between_cards'=>'Guías · entre tarjetas',
- 'guide_article_middle'=>'Guía · artículo',
- 'market_sidebar'=>'Market · sidebar',
- 'character_profile_bottom'=>'Personaje · inferior'
+ 'global_footer'=>'Antes del footer'
 ];
 ?>
 <?php if(!empty($success)): ?><div class="form-alert success wide"><?= $e($success) ?></div><?php endif; ?>
@@ -42,8 +34,11 @@ $placements=[
             <label>Google Tag Manager<input name="gtm_id" value="<?= $e((string)($settings['gtm_id']??'')) ?>" placeholder="GTM-XXXXXXX"></label>
             <label>AdSense Publisher ID<input name="adsense_client" value="<?= $e((string)($settings['adsense_client']??'')) ?>" placeholder="ca-pub-1234567890123456"></label>
         </div>
+        <label>Google Site Verification / Search Console<input name="google_site_verification" maxlength="180" value="<?= $e((string)($settings['google_site_verification']??'')) ?>" placeholder="Token de verificación de Google"></label>
+        <small>Ingresa solo el valor del atributo content; OMEGA genera automáticamente la meta google-site-verification.</small>
 
         <label class="check-line"><input type="checkbox" name="adsense_auto_ads" value="1" <?= ($settings['adsense_auto_ads']??'0')==='1'?'checked':'' ?>><span>Permitir Auto Ads (el script global de AdSense quedará disponible)</span></label>
+        <div class="notice-box">Si usas Google Tag Manager, configura también allí tus reglas de consentimiento. OMEGA solo decide cuándo cargar el contenedor; las etiquetas internas siguen bajo control de GTM.</div>
         <label class="check-line"><input type="checkbox" name="hide_ads_logged" value="1" <?= ($settings['hide_ads_logged']??'0')==='1'?'checked':'' ?>><span>Ocultar bloques a usuarios conectados</span></label>
         <label class="check-line"><input type="checkbox" name="hide_ads_admin" value="1" <?= ($settings['hide_ads_admin']??'1')==='1'?'checked':'' ?>><span>Ocultar bloques a administradores</span></label>
 
