@@ -13,6 +13,7 @@ final class MonetizationCenter
         'ga4_id'=>'',
         'google_ads_id'=>'',
         'gtm_id'=>'',
+        'google_site_verification'=>'',
         'adsense_client'=>'',
         'adsense_auto_ads'=>'0',
         'consent_enabled'=>'1',
@@ -89,6 +90,7 @@ final class MonetizationCenter
             'ga4_id'=>$this->validateOptionalId((string)($input['ga4_id']??''),'/^G-[A-Z0-9]{5,20}$/i','GA4'),
             'google_ads_id'=>$this->validateOptionalId((string)($input['google_ads_id']??''),'/^AW-[0-9]{5,20}$/i','Google Ads'),
             'gtm_id'=>$this->validateOptionalId((string)($input['gtm_id']??''),'/^GTM-[A-Z0-9]{4,20}$/i','Google Tag Manager'),
+            'google_site_verification'=>$this->validateVerification((string)($input['google_site_verification']??'')),
             'adsense_client'=>$this->validateOptionalId((string)($input['adsense_client']??''),'/^ca-pub-[0-9]{10,20}$/i','AdSense Publisher ID'),
             'adsense_auto_ads'=>!empty($input['adsense_auto_ads'])?'1':'0',
             'consent_enabled'=>!empty($input['consent_enabled'])?'1':'0',
@@ -106,7 +108,7 @@ final class MonetizationCenter
                 USING (SELECT :setting_key AS setting_key) AS source
                 ON target.setting_key=source.setting_key
                 WHEN MATCHED THEN UPDATE SET setting_value=:setting_value,updated_at=SYSUTCDATETIME()
-                WHEN NOT MATCHED THEN INSERT(setting_key,setting_value) VALUES(:setting_key,:setting_value);
+                WHEN NOT MATCHED THEN INSERT(setting_key,setting_value) VALUES(source.setting_key,:setting_value);
             ",['setting_key'=>$key,'setting_value'=>$value]);
         }
     }
@@ -274,7 +276,10 @@ final class MonetizationCenter
             if ($ga!=='') $html[]='<meta name="omega-ga4-id" content="'.Security::e($ga).'">';
             if ($aw!=='') $html[]='<meta name="omega-google-ads-id" content="'.Security::e($aw).'">';
         }
-        if ($adsAllowed && $s['adsense_client']!=='') {
+        if ((string)($s['google_site_verification']??'')!=='') {
+            $html[]='<meta name="google-site-verification" content="'.Security::e((string)$s['google_site_verification']).'">';
+        }
+        if ($adsAllowed && $s['adsense_client']!=='' && ($s['adsense_auto_ads']??'0')==='1') {
             $html[]='<meta name="omega-adsense-client" content="'.Security::e((string)$s['adsense_client']).'">';
         }
         return implode("\n",$html);
@@ -347,6 +352,16 @@ final class MonetizationCenter
         return $value;
     }
 
+    private function validateVerification(string $value): string
+    {
+        $value=trim($value);
+        if ($value==='') return '';
+        if (strlen($value)>180 || !preg_match('/^[A-Za-z0-9_-]+$/',$value)) {
+            throw new RuntimeException('El token de Google Site Verification no es válido.');
+        }
+        return $value;
+    }
+
     private function cleanText(string $value, int $max): string
     {
         $value=trim(strip_tags($value));
@@ -379,12 +394,7 @@ final class MonetizationCenter
     private function sanitizeBlockHtml(string $html): string
     {
         $html=trim($html);
-        if ($html==='') return '';
-        $html=preg_replace('#<(script|style|iframe|object|embed|form)\b[^>]*>.*?</\1\s*>#is','',$html) ?? $html;
-        $html=strip_tags($html,'<div><span><p><br><strong><b><em><i><a><img><small><hr>');
-        $html=preg_replace('/\s+on[a-z]+\s*=\s*("[^"]*"|\'[^\']*\'|[^\s>]+)/i','',$html) ?? $html;
-        $html=preg_replace('/(href|src)\s*=\s*(["\'])\s*(javascript|data|vbscript):.*?\2/i','$1="#"',$html) ?? $html;
-        return $html;
+        return $html==='' ? '' : GuideManager::sanitizeHtml($html);
     }
 
     private function dateOrNull(string $value): ?string
