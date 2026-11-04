@@ -38,13 +38,13 @@ use Omega\Services\SocialProfileManager;
 use Omega\Services\DesignStudio;
 use Omega\Services\GuildRankingProfessional;
 use Omega\Services\GuideManager;
+use Omega\Services\MonetizationCenter;
 use Omega\Core\Csrf;
 use Omega\Core\RateLimiter;
 
 Env::load($root.'/.env');
 date_default_timezone_set((string)Env::get('APP_TIMEZONE','America/Santiago'));
 Session::start();
-Security::headers();
 
 $dbConfig = require $root.'/config/database.php';
 $appConfig = require $root.'/config/app.php';
@@ -77,11 +77,14 @@ $designStudio->ensureSchema();
 $guildRankingProfessional = new GuildRankingProfessional($muDb);
 $guideManager = new GuideManager($cmsDb,$root);
 $guideManager->ensureSchema();
+$monetization = new MonetizationCenter($cmsDb);
+$monetization->ensureSchema();
+Security::headers($monetization->securityGoogleEnabled());
 $appName = (string)($appConfig['name'] ?? 'Omega MU');
 $modules = (new ModuleManager($root.'/modules'))->discover();
 
 function renderPage(string $root, string $appName, Driver $driver, AccountAuth $auth, AdminAccess $adminAccess, string $template, array $data=[]): string {
-    global $moduleRuntime,$designStudio;
+    global $moduleRuntime,$designStudio,$monetization;
 
     try { $stats = $driver->statistics(); }
     catch (Throwable $e) { $stats = ['online'=>0,'accounts'=>0,'characters'=>0,'guilds'=>0]; }
@@ -94,6 +97,11 @@ function renderPage(string $root, string $appName, Driver $driver, AccountAuth $
     } catch (Throwable) {}
 
     $body = View::render($template, $data + ['stats'=>$stats]);
+    $loggedAccount=$auth->currentId();
+    $isAdmin=$adminAccess->isAdmin($loggedAccount);
+    $requestPath=parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+    $monetizationContext=$monetization->publicContext($loggedAccount,$isAdmin,$requestPath);
+
     return View::render('layout', [
         'title'=>$data['title'] ?? 'Inicio',
         'active'=>$data['active'] ?? 'home',
@@ -101,9 +109,11 @@ function renderPage(string $root, string $appName, Driver $driver, AccountAuth $
         'stats'=>$stats,
         'appName'=>$appName,
         'serverVersion'=>'MuEmu 0.97k Kayito',
-        'loggedAccount'=>$auth->currentId(),
-        'isAdmin'=>$adminAccess->isAdmin($auth->currentId()),
+        'loggedAccount'=>$loggedAccount,
+        'isAdmin'=>$isAdmin,
         'moduleHeadHtml'=>$moduleHeadHtml,
+        'monetization'=>$monetization,
+        'monetizationContext'=>$monetizationContext,
         'design'=>$designStudio->publicContext(
             $template,
             (string)($data['active'] ?? 'home'),
@@ -162,6 +172,20 @@ if (preg_match('#^/module-assets/([a-z0-9_-]{3,80})/(.+)$#',$path,$am)) {
 
 // cPanel puede servir /index.php directamente.
 if ($path === '/index.php') $path = '/';
+
+if ($path === '/ads.txt') {
+    $adsTxt=$monetization->adsTxt();
+    if ($adsTxt===null) {
+        http_response_code(404);
+        header('Content-Type: text/plain; charset=utf-8');
+        echo "ads.txt no está publicado.\n";
+    } else {
+        header('Content-Type: text/plain; charset=utf-8');
+        header('Cache-Control: public, max-age=3600');
+        echo $adsTxt;
+    }
+    exit;
+}
 
 try {
     // APIs permanecen JSON, pero la portada ya no.
@@ -859,6 +883,63 @@ try {
                 $_SESSION['_flash_error']=$e->getMessage();
             }
             $redirect('/admin/guides');
+        }
+
+        if ($path === '/admin/monetization') {
+            try { $adminAccess->requireSuperAdmin($accountId); }
+            catch(Throwable $e) {
+                http_response_code(403);
+                $renderAdmin('Acceso denegado','dashboard','simple',[
+                    'heading'=>'Solo SuperAdmin',
+                    'lead'=>'Google & Monetization Center PRO administra scripts, publicidad y privacidad global.'
+                ]);
+                exit;
+            }
+            $editId=(int)($_GET['edit']??0);
+            $renderAdmin('Google & Monetization','monetization','admin_monetization',[
+                'settings'=>$monetization->settings(),
+                'rows'=>$monetization->placements(),
+                'item'=>$editId>0 ? ($monetization->findPlacement($editId)??[]) : [],
+                'success'=>$flashSuccess,
+                'error'=>$flashError
+            ]);
+            exit;
+        }
+
+        if ($path === '/admin/monetization/settings' && $method === 'POST') {
+            $adminAccess->requireSuperAdmin($accountId);
+            $requireCsrf();
+            try {
+                $monetization->saveSettings($_POST);
+                $_SESSION['_flash_success']='Configuración de Google y monetización actualizada.';
+            } catch(Throwable $e) {
+                $_SESSION['_flash_error']=$e->getMessage();
+            }
+            $redirect('/admin/monetization');
+        }
+
+        if ($path === '/admin/monetization/placement/save' && $method === 'POST') {
+            $adminAccess->requireSuperAdmin($accountId);
+            $requireCsrf();
+            try {
+                $monetization->savePlacement($_POST);
+                $_SESSION['_flash_success']='Bloque publicitario guardado.';
+            } catch(Throwable $e) {
+                $_SESSION['_flash_error']=$e->getMessage();
+            }
+            $redirect('/admin/monetization');
+        }
+
+        if ($path === '/admin/monetization/placement/delete' && $method === 'POST') {
+            $adminAccess->requireSuperAdmin($accountId);
+            $requireCsrf();
+            try {
+                $monetization->deletePlacement((int)($_POST['id']??0));
+                $_SESSION['_flash_success']='Bloque publicitario eliminado.';
+            } catch(Throwable $e) {
+                $_SESSION['_flash_error']=$e->getMessage();
+            }
+            $redirect('/admin/monetization');
         }
 
         if ($path === '/admin/changelog') {
