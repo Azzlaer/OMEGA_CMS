@@ -2777,3 +2777,13 @@ body.omega-admin-enterprise{
     background:#2b141a;
     color:#ffadb9;
 }
+
+
+/* v0.27.2 — hCaptcha login security */
+.omega-hcaptcha-box{padding:14px;border:1px solid #2d3d49;border-radius:9px;background:#0a1219;overflow:hidden}
+.omega-hcaptcha-head{display:flex;align-items:center;gap:9px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #202d37}
+.omega-hcaptcha-head>span{width:32px;height:32px;display:grid;place-items:center;border:1px solid #355346;border-radius:8px;background:#0d1c17;color:#5be0a5}
+.omega-hcaptcha-head strong{display:block;color:#dfe8ed;font-size:11px}
+.omega-hcaptcha-head small{display:block;margin-top:2px;color:#708292;font-size:8px}
+.omega-hcaptcha-box .h-captcha{max-width:100%;overflow:hidden}
+@media(max-width:420px){.omega-hcaptcha-box{padding:10px}.omega-hcaptcha-box .h-captcha{transform:scale(.88);transform-origin:left top;margin-bottom:-8px}}
