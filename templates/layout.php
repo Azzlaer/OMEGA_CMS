@@ -49,7 +49,7 @@ $pageFixed=!empty($dsPage['fixed']);
 <meta name="theme-color" content="#090b0f">
 <title><?= $e($title) ?> · <?= $e($appName) ?></title>
 <meta name="description" content="<?= $e($appName) ?> - Comunidad MU Online clásica 0.97k">
-<link rel="stylesheet" href="/public/assets/css/omega.css?v=240">
+<link rel="stylesheet" href="/public/assets/css/omega.css?v=273">
 <script defer src="/public/assets/js/omega.js?v=240"></script>
 <?= $moduleHeadHtml ?>
 <?php if(!empty($monetizationContext['enabled'])): ?>
