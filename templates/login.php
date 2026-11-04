@@ -3,6 +3,8 @@ use Omega\Core\Security;
 use Omega\Core\Csrf;
 $e=[Security::class,'e'];
 $error=$error??null; $success=$success??null;
+$hcaptchaEnabled=!empty($hcaptchaEnabled);
+$hcaptchaSiteKey=trim((string)($hcaptchaSiteKey??''));
 ?>
 <section class="page-hero compact"><div class="container">
 <span class="eyebrow">ACCOUNT PANEL</span><h1>Ingresar a mi cuenta</h1>
@@ -21,6 +23,19 @@ $error=$error??null; $success=$success??null;
         <label>Contraseña
             <input type="password" name="password" maxlength="20" required autocomplete="current-password" placeholder="••••••••">
         </label>
+
+        <?php if($hcaptchaEnabled && $hcaptchaSiteKey!==''): ?>
+        <div class="omega-hcaptcha-box">
+            <div class="omega-hcaptcha-head">
+                <span>🛡</span>
+                <div><strong>Verificación anti-bot</strong><small>Protección hCaptcha activa</small></div>
+            </div>
+            <div class="h-captcha" data-sitekey="<?= $e($hcaptchaSiteKey) ?>" data-theme="dark"></div>
+        </div>
+        <?php elseif($hcaptchaEnabled): ?>
+        <div class="form-alert error">hCaptcha está activado pero falta configurar HCAPTCHA_SITEKEY.</div>
+        <?php endif; ?>
+
         <button class="btn btn-primary full" type="submit">Ingresar</button>
     </form>
     <div class="auth-links"><a href="/register">Crear cuenta</a><span>·</span><a href="/account/recovery">Recuperar contraseña</a></div>
@@ -31,7 +46,12 @@ $error=$error??null; $success=$success??null;
         <li><b>Sesiones seguras</b><span>Cookie HttpOnly + SameSite + regeneración de sesión.</span></li>
         <li><b>Protección CSRF</b><span>Las operaciones sensibles requieren token.</span></li>
         <li><b>Anti brute-force</b><span>Los intentos de acceso se limitan y registran.</span></li>
+        <li><b>hCaptcha</b><span>El login puede requerir una verificación humana antes de consultar credenciales.</span></li>
         <li><b>Operaciones offline</b><span>No modificamos personajes mientras están conectados.</span></li>
     </ul>
 </aside>
 </div></section>
+
+<?php if($hcaptchaEnabled && $hcaptchaSiteKey!==''): ?>
+<script src="https://js.hcaptcha.com/1/api.js?hl=es" async defer></script>
+<?php endif; ?>

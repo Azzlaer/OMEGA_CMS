@@ -290,6 +290,10 @@ function dsBytes(int $bytes): string {
             <input type="file" name="media" accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm" required>
             <small>Imágenes máximo 12 MB · Videos máximo 60 MB · No se permite SVG.</small>
         </label>
+        <label class="check-line design-upload-apply">
+            <input type="checkbox" name="use_as_global_background" value="1">
+            <span>Si es una imagen, usarla inmediatamente como nuevo fondo global</span>
+        </label>
         <button class="btn btn-primary" type="submit">⬆ Subir a Biblioteca</button>
     </form>
 
@@ -315,13 +319,23 @@ function dsBytes(int $bytes): string {
                 </small>
                 <code><?= $e((string)$a['public_path']) ?></code>
 
-                <form method="post" action="/admin/design-studio/asset/delete"
-                      class="design-delete-form"
-                      onsubmit="return confirm('¿Eliminar definitivamente este archivo de la Biblioteca Multimedia?');">
-                    <input type="hidden" name="_csrf" value="<?= $e(Csrf::token()) ?>">
-                    <input type="hidden" name="asset_id" value="<?= (int)$a['id'] ?>">
-                    <button class="btn btn-ghost" type="submit">🗑 Eliminar</button>
-                </form>
+                <div class="design-media-actions">
+                    <?php if(($a['media_type']??'')==='image'): ?>
+                    <form method="post" action="/admin/design-studio/asset/use-global">
+                        <input type="hidden" name="_csrf" value="<?= $e(Csrf::token()) ?>">
+                        <input type="hidden" name="asset_id" value="<?= (int)$a['id'] ?>">
+                        <button class="btn btn-primary" type="submit">🖼 Usar como fondo global</button>
+                    </form>
+                    <?php endif; ?>
+
+                    <form method="post" action="/admin/design-studio/asset/delete"
+                          class="design-delete-form"
+                          onsubmit="return confirm('¿Eliminar este archivo? Si está siendo usado como fondo o Hero, OMEGA lo desasociará automáticamente.');">
+                        <input type="hidden" name="_csrf" value="<?= $e(Csrf::token()) ?>">
+                        <input type="hidden" name="asset_id" value="<?= (int)$a['id'] ?>">
+                        <button class="btn btn-ghost danger" type="submit">🗑 Eliminar y desasociar</button>
+                    </form>
+                </div>
             </div>
         </article>
     <?php endforeach; ?>

@@ -38,13 +38,14 @@ use Omega\Services\SocialProfileManager;
 use Omega\Services\DesignStudio;
 use Omega\Services\GuildRankingProfessional;
 use Omega\Services\GuideManager;
+use Omega\Services\MonetizationCenter;
+use Omega\Services\HCaptchaService;
 use Omega\Core\Csrf;
 use Omega\Core\RateLimiter;
 
 Env::load($root.'/.env');
 date_default_timezone_set((string)Env::get('APP_TIMEZONE','America/Santiago'));
 Session::start();
-Security::headers();
 
 $dbConfig = require $root.'/config/database.php';
 $appConfig = require $root.'/config/app.php';
@@ -77,11 +78,15 @@ $designStudio->ensureSchema();
 $guildRankingProfessional = new GuildRankingProfessional($muDb);
 $guideManager = new GuideManager($cmsDb,$root);
 $guideManager->ensureSchema();
+$monetization = new MonetizationCenter($cmsDb);
+$monetization->ensureSchema();
+$hcaptcha = new HCaptchaService();
+Security::headers($monetization->securityGoogleEnabled(),$hcaptcha->enabled());
 $appName = (string)($appConfig['name'] ?? 'Omega MU');
 $modules = (new ModuleManager($root.'/modules'))->discover();
 
 function renderPage(string $root, string $appName, Driver $driver, AccountAuth $auth, AdminAccess $adminAccess, string $template, array $data=[]): string {
-    global $moduleRuntime,$designStudio;
+    global $moduleRuntime,$designStudio,$monetization;
 
     try { $stats = $driver->statistics(); }
     catch (Throwable $e) { $stats = ['online'=>0,'accounts'=>0,'characters'=>0,'guilds'=>0]; }
@@ -94,6 +99,11 @@ function renderPage(string $root, string $appName, Driver $driver, AccountAuth $
     } catch (Throwable) {}
 
     $body = View::render($template, $data + ['stats'=>$stats]);
+    $loggedAccount=$auth->currentId();
+    $isAdmin=$adminAccess->isAdmin($loggedAccount);
+    $requestPath=parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+    $monetizationContext=$monetization->publicContext($loggedAccount,$isAdmin,$requestPath);
+
     return View::render('layout', [
         'title'=>$data['title'] ?? 'Inicio',
         'active'=>$data['active'] ?? 'home',
@@ -101,9 +111,11 @@ function renderPage(string $root, string $appName, Driver $driver, AccountAuth $
         'stats'=>$stats,
         'appName'=>$appName,
         'serverVersion'=>'MuEmu 0.97k Kayito',
-        'loggedAccount'=>$auth->currentId(),
-        'isAdmin'=>$adminAccess->isAdmin($auth->currentId()),
+        'loggedAccount'=>$loggedAccount,
+        'isAdmin'=>$isAdmin,
         'moduleHeadHtml'=>$moduleHeadHtml,
+        'monetization'=>$monetization,
+        'monetizationContext'=>$monetizationContext,
         'design'=>$designStudio->publicContext(
             $template,
             (string)($data['active'] ?? 'home'),
@@ -162,6 +174,20 @@ if (preg_match('#^/module-assets/([a-z0-9_-]{3,80})/(.+)$#',$path,$am)) {
 
 // cPanel puede servir /index.php directamente.
 if ($path === '/index.php') $path = '/';
+
+if ($path === '/ads.txt') {
+    $adsTxt=$monetization->adsTxt();
+    if ($adsTxt===null) {
+        http_response_code(404);
+        header('Content-Type: text/plain; charset=utf-8');
+        echo "ads.txt no está publicado.\n";
+    } else {
+        header('Content-Type: text/plain; charset=utf-8');
+        header('Cache-Control: public, max-age=3600');
+        echo $adsTxt;
+    }
+    exit;
+}
 
 try {
     // APIs permanecen JSON, pero la portada ya no.
@@ -407,6 +433,17 @@ try {
             $requireCsrf();
             $old['username'] = trim((string)($_POST['username'] ?? ''));
             try {
+                if($hcaptcha->protects('login')){
+                    $verified=$hcaptcha->verify(
+                        (string)($_POST['h-captcha-response']??''),
+                        $clientIp,
+                        'login'
+                    );
+                    if(!$verified){
+                        throw new RuntimeException('HCAPTCHA_FAILED');
+                    }
+                }
+
                 $auth->login(
                     (string)($_POST['username'] ?? ''),
                     (string)($_POST['password'] ?? ''),
@@ -418,13 +455,20 @@ try {
                 $_SESSION['_flash_success'] = 'Sesión iniciada correctamente.';
                 $redirect('/account');
             } catch (Throwable $e) {
-                $error = $e->getMessage();
+                $code=$e->getMessage();
+                if(str_starts_with($code,'HCAPTCHA_')){
+                    $error=$hcaptcha->friendlyError($code,'login');
+                }else{
+                    $error=$code;
+                }
             }
         }
 
         echo renderPage($root,$appName,$driver,$auth,$adminAccess,'login',[
             'title'=>'Mi Cuenta','active'=>'account','error'=>$error,'old'=>$old,
-            'success'=>$flashSuccess
+            'success'=>$flashSuccess,
+            'hcaptchaEnabled'=>$hcaptcha->protects('login'),
+            'hcaptchaSiteKey'=>$hcaptcha->siteKey()
         ]);
         exit;
     }
@@ -442,17 +486,35 @@ try {
                 'personal_id'=>trim((string)($_POST['personal_id'] ?? '')),
             ];
             try {
+                if($hcaptcha->protects('register')){
+                    $verified=$hcaptcha->verify(
+                        (string)($_POST['h-captcha-response']??''),
+                        $clientIp,
+                        'register'
+                    );
+                    if(!$verified){
+                        throw new RuntimeException('HCAPTCHA_FAILED');
+                    }
+                }
+
                 $created = $auth->register($_POST, $clientIp);
                 $_SESSION['_flash_success'] = 'Cuenta '.$created.' creada correctamente. Ya puedes iniciar sesión.';
                 $redirect('/login');
             } catch (Throwable $e) {
-                $error = $e->getMessage();
+                $code=$e->getMessage();
+                if(str_starts_with($code,'HCAPTCHA_')){
+                    $error=$hcaptcha->friendlyError($code,'register');
+                }else{
+                    $error=$code;
+                }
             }
         }
 
         echo renderPage($root,$appName,$driver,$auth,$adminAccess,'register',[
             'title'=>'Crear Cuenta','active'=>'account','error'=>$error,'old'=>$old,'appName'=>$appName,
-            'moduleAssets'=>$moduleRuntime->assetsFor('register')
+            'moduleAssets'=>$moduleRuntime->assetsFor('register'),
+            'hcaptchaEnabled'=>$hcaptcha->protects('register'),
+            'hcaptchaSiteKey'=>$hcaptcha->siteKey()
         ]);
         exit;
     }
@@ -859,6 +921,63 @@ try {
                 $_SESSION['_flash_error']=$e->getMessage();
             }
             $redirect('/admin/guides');
+        }
+
+        if ($path === '/admin/monetization') {
+            try { $adminAccess->requireSuperAdmin($accountId); }
+            catch(Throwable $e) {
+                http_response_code(403);
+                $renderAdmin('Acceso denegado','dashboard','simple',[
+                    'heading'=>'Solo SuperAdmin',
+                    'lead'=>'Google & Monetization Center PRO administra scripts, publicidad y privacidad global.'
+                ]);
+                exit;
+            }
+            $editId=(int)($_GET['edit']??0);
+            $renderAdmin('Google & Monetization','monetization','admin_monetization',[
+                'settings'=>$monetization->settings(),
+                'rows'=>$monetization->placements(),
+                'item'=>$editId>0 ? ($monetization->findPlacement($editId)??[]) : [],
+                'success'=>$flashSuccess,
+                'error'=>$flashError
+            ]);
+            exit;
+        }
+
+        if ($path === '/admin/monetization/settings' && $method === 'POST') {
+            $adminAccess->requireSuperAdmin($accountId);
+            $requireCsrf();
+            try {
+                $monetization->saveSettings($_POST);
+                $_SESSION['_flash_success']='Configuración de Google y monetización actualizada.';
+            } catch(Throwable $e) {
+                $_SESSION['_flash_error']=$e->getMessage();
+            }
+            $redirect('/admin/monetization');
+        }
+
+        if ($path === '/admin/monetization/placement/save' && $method === 'POST') {
+            $adminAccess->requireSuperAdmin($accountId);
+            $requireCsrf();
+            try {
+                $monetization->savePlacement($_POST);
+                $_SESSION['_flash_success']='Bloque publicitario guardado.';
+            } catch(Throwable $e) {
+                $_SESSION['_flash_error']=$e->getMessage();
+            }
+            $redirect('/admin/monetization');
+        }
+
+        if ($path === '/admin/monetization/placement/delete' && $method === 'POST') {
+            $adminAccess->requireSuperAdmin($accountId);
+            $requireCsrf();
+            try {
+                $monetization->deletePlacement((int)($_POST['id']??0));
+                $_SESSION['_flash_success']='Bloque publicitario eliminado.';
+            } catch(Throwable $e) {
+                $_SESSION['_flash_error']=$e->getMessage();
+            }
+            $redirect('/admin/monetization');
         }
 
         if ($path === '/admin/changelog') {
@@ -1272,14 +1391,46 @@ try {
             $adminAccess->requireSuperAdmin($accountId);
             $requireCsrf();
             try{
-                $designStudio->upload(
+                $assetId=$designStudio->upload(
                     $_FILES['media']??[],
                     (string)($_POST['label']??''),
                     $accountId
                 );
-                $_SESSION['_flash_success']='Archivo agregado a la Biblioteca Multimedia.';
+
+                if(!empty($_POST['use_as_global_background']) && $assetId>0){
+                    $designStudio->useAsGlobalBackground($assetId);
+                    $_SESSION['_flash_success']='Archivo subido y aplicado como nuevo fondo global.';
+                }else{
+                    $_SESSION['_flash_success']='Archivo agregado a la Biblioteca Multimedia.';
+                }
             }catch(Throwable $e){
-                $_SESSION['_flash_error']=$e->getMessage();
+                $message=$e->getMessage();
+                $friendly=[
+                    'MEDIA_UPLOAD_FAILED_1'=>'El archivo supera el límite upload_max_filesize configurado en PHP.',
+                    'MEDIA_UPLOAD_FAILED_2'=>'El archivo supera el tamaño máximo permitido por el formulario.',
+                    'MEDIA_UPLOAD_FAILED_3'=>'La subida quedó incompleta. Inténtalo nuevamente.',
+                    'MEDIA_UPLOAD_FAILED_4'=>'No se recibió ningún archivo.',
+                    'MEDIA_UPLOAD_FAILED_6'=>'PHP no encuentra su carpeta temporal de uploads.',
+                    'MEDIA_UPLOAD_FAILED_7'=>'PHP no pudo escribir el archivo en disco.',
+                    'MEDIA_UPLOAD_FAILED_8'=>'Una extensión de PHP detuvo la subida.',
+                    'MEDIA_TYPE_NOT_ALLOWED'=>'Formato no permitido. Usa JPG, PNG, WEBP, GIF, MP4 o WEBM.',
+                    'IMAGE_TOO_LARGE'=>'La imagen supera 12 MB.',
+                    'VIDEO_TOO_LARGE'=>'El video supera 60 MB.',
+                    'IMAGE_DIMENSIONS_INVALID'=>'La imagen debe medir entre 320×120 y 7680×4320 píxeles.',
+                ];
+                $_SESSION['_flash_error']=$friendly[$message]??$message;
+            }
+            $redirect('/admin/design-studio#library');
+        }
+
+        if ($path === '/admin/design-studio/asset/use-global' && $method === 'POST') {
+            $adminAccess->requireSuperAdmin($accountId);
+            $requireCsrf();
+            try{
+                $designStudio->useAsGlobalBackground((int)($_POST['asset_id']??0));
+                $_SESSION['_flash_success']='Fondo global actualizado correctamente.';
+            }catch(Throwable $e){
+                $_SESSION['_flash_error']='No se pudo aplicar la imagen: '.$e->getMessage();
             }
             $redirect('/admin/design-studio#library');
         }
@@ -1380,7 +1531,10 @@ try {
                 $adminManager->saveSettings($_POST);
                 $redirect('/admin/settings');
             }
-            $renderAdmin('Configuración','settings','admin_settings',['settings'=>$adminManager->settings()]);
+            $renderAdmin('Configuración','settings','admin_settings',[
+                'settings'=>$adminManager->settings(),
+                'hcaptchaDiagnostic'=>$hcaptcha->diagnostic()
+            ]);
             exit;
         }
 

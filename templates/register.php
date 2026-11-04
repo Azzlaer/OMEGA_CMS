@@ -2,6 +2,8 @@
 use Omega\Core\Security;
 use Omega\Core\Csrf;
 $e=[Security::class,'e']; $error=$error??null; $old=$old??[]; $moduleAssets=$moduleAssets??[];
+$hcaptchaEnabled=!empty($hcaptchaEnabled);
+$hcaptchaSiteKey=trim((string)($hcaptchaSiteKey??''));
 ?>
 <?php foreach($moduleAssets as $asset): ?>
 <?php if(($asset['type']??'')==='css'): ?><link rel="stylesheet" href="<?= $e($asset['url']) ?>"><?php endif; ?>
@@ -38,6 +40,19 @@ $e=[Security::class,'e']; $error=$error??null; $old=$old??[]; $moduleAssets=$mod
         </label>
         <div id="omega-register-module-fields"></div>
         <label class="check-line"><input type="checkbox" name="terms" value="1" required> <span>Acepto las reglas y condiciones del servidor.</span></label>
+
+        <?php if($hcaptchaEnabled && $hcaptchaSiteKey!==''): ?>
+        <div class="omega-hcaptcha-box">
+            <div class="omega-hcaptcha-head">
+                <span>🛡</span>
+                <div><strong>Verificación anti-bot</strong><small>Protección hCaptcha activa para nuevos registros</small></div>
+            </div>
+            <div class="h-captcha" data-sitekey="<?= $e($hcaptchaSiteKey) ?>" data-theme="dark"></div>
+        </div>
+        <?php elseif($hcaptchaEnabled): ?>
+        <div class="form-alert error">hCaptcha está activado pero falta configurar HCAPTCHA_SITEKEY.</div>
+        <?php endif; ?>
+
         <button class="btn btn-primary full" type="submit">Crear cuenta</button>
     </form>
     <div class="auth-links">¿Ya tienes cuenta? <a href="/login">Ingresar</a></div>
@@ -53,3 +68,7 @@ $e=[Security::class,'e']; $error=$error??null; $old=$old??[]; $moduleAssets=$mod
     </div>
 </aside>
 </div></section>
+
+<?php if($hcaptchaEnabled && $hcaptchaSiteKey!==''): ?>
+<script src="https://js.hcaptcha.com/1/api.js?hl=es" async defer></script>
+<?php endif; ?>

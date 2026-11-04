@@ -1,5 +1,6 @@
 <?php
 use Omega\Core\Security; use Omega\Core\Csrf; $e=[Security::class,'e']; $s=$settings??[];
+$hc=$hcaptchaDiagnostic??[];
 ?>
 <div class="admin-panel"><form method="post" action="/admin/settings" class="omega-form admin-form">
 <input type="hidden" name="_csrf" value="<?= $e(Csrf::token()) ?>">
@@ -8,6 +9,44 @@ use Omega\Core\Security; use Omega\Core\Csrf; $e=[Security::class,'e']; $s=$sett
 <label>Descripción<textarea name="server_description" rows="4"><?= $e($s['server_description']??'') ?></textarea></label>
 <label>Discord URL<input name="discord_url" value="<?= $e($s['discord_url']??'') ?>"></label>
 <label>Nota de descargas<textarea name="downloads_note" rows="3"><?= $e($s['downloads_note']??'') ?></textarea></label>
+
+<div class="admin-setting-feature">
+    <div>
+        <span class="eyebrow">SEGURIDAD WEB</span>
+        <h3>🛡 hCaptcha Security Status</h3>
+        <p>Estado de la protección anti-bot configurada mediante el archivo <code>.env</code>.</p>
+    </div>
+
+    <div class="admin-security-status-grid">
+        <div class="admin-security-status <?= !empty($hc['enabled'])?'ok':'off' ?>">
+            <span>Servicio</span>
+            <strong><?= !empty($hc['enabled'])?'ACTIVO':'DESACTIVADO' ?></strong>
+        </div>
+        <div class="admin-security-status <?= !empty($hc['configured'])?'ok':'bad' ?>">
+            <span>Claves</span>
+            <strong><?= !empty($hc['configured'])?'CONFIGURADAS':'INCOMPLETAS' ?></strong>
+        </div>
+        <div class="admin-security-status <?= !empty($hc['curl_available'])?'ok':'bad' ?>">
+            <span>PHP cURL</span>
+            <strong><?= !empty($hc['curl_available'])?'DISPONIBLE':'NO DISPONIBLE' ?></strong>
+        </div>
+        <div class="admin-security-status <?= !empty($hc['ready'])?'ok':'bad' ?>">
+            <span>Estado general</span>
+            <strong><?= !empty($hc['ready'])?'PROTEGIDO':'REVISAR' ?></strong>
+        </div>
+    </div>
+
+    <div class="admin-security-route-list">
+        <span class="<?= !empty($hc['login'])?'enabled':'disabled' ?>">Login</span>
+        <span class="<?= !empty($hc['register'])?'enabled':'disabled' ?>">Registro</span>
+        <span class="<?= !empty($hc['recovery'])?'enabled':'disabled' ?>">Recuperación</span>
+    </div>
+
+    <div class="notice-box">
+        La Sitekey y la Secret se leen directamente desde <code>.env</code>. OMEGA nunca muestra la Secret en el AdminCP.
+        Login y Registro quedan protegidos automáticamente cuando <code>HCAPTCHA_ENABLED=true</code>.
+    </div>
+</div>
 
 <div class="admin-setting-feature">
     <div>
