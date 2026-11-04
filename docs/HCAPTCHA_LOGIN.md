@@ -19,6 +19,11 @@ Agrega estas variables al archivo privado `.env` de la instalación:
 HCAPTCHA_ENABLED=true
 HCAPTCHA_SITEKEY=TU_SITEKEY_PUBLICA
 HCAPTCHA_SECRET=TU_SECRET_PRIVADA
+
+# Opcionales. Si no existen, Login y Registro quedan activos por defecto.
+HCAPTCHA_LOGIN=true
+HCAPTCHA_REGISTER=true
+HCAPTCHA_RECOVERY=false
 ```
 
 Para desactivar temporalmente la protección:
@@ -59,3 +64,16 @@ Se habilitan en `script-src`, `frame-src`, `style-src` y `connect-src`.
 - No se confía en headers IP reenviados arbitrariamente; OMEGA usa `REMOTE_ADDR`.
 - Los tokens son de un solo uso y deben validarse en el backend.
 - hCaptcha complementa, no reemplaza, CSRF, rate limiting ni la contraseña.
+
+
+## 7. Security Status en AdminCP
+
+En `AdminCP > Configuración` OMEGA muestra un diagnóstico sin exponer valores sensibles:
+
+- hCaptcha activo/desactivado.
+- Claves detectadas/incompletas.
+- PHP cURL disponible/no disponible.
+- Estado general.
+- Formularios protegidos: Login, Registro y Recovery.
+
+La Secret nunca se imprime en HTML ni en logs del panel.
