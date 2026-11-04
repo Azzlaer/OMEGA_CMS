@@ -10,6 +10,11 @@ $serverVersion = $serverVersion ?? 'MuEmu 0.97k';
 $loggedAccount = $loggedAccount ?? null;
 $isAdmin = $isAdmin ?? false;
 $moduleHeadHtml = $moduleHeadHtml ?? '';
+$monetization=$monetization??null;
+$monetizationContext=$monetizationContext??['enabled'=>false,'settings'=>[],'showConsent'=>false];
+$renderAd=static function(string $key) use($monetization,$monetizationContext): string {
+    return $monetization ? $monetization->renderPlacement($key,$monetizationContext) : '';
+};
 
 $design=$design??[];
 $ds=$design['settings']??[];
@@ -47,6 +52,10 @@ $pageFixed=!empty($dsPage['fixed']);
 <link rel="stylesheet" href="/public/assets/css/omega.css?v=240">
 <script defer src="/public/assets/js/omega.js?v=240"></script>
 <?= $moduleHeadHtml ?>
+<?php if(!empty($monetizationContext['enabled'])): ?>
+<?= (string)($monetizationContext['headHtml']??'') ?>
+<script defer src="/public/assets/js/monetization.js?v=100"></script>
+<?php endif; ?>
 <style id="omega-design-vars">
 :root{<?= $e($cssVarText) ?>}
 </style>
@@ -137,9 +146,16 @@ $pageFixed=!empty($dsPage['fixed']);
     </nav>
 </header>
 
+<?= $renderAd('global_header') ?>
+<?= $renderAd('below_navigation') ?>
+
 <main>
+<?= $renderAd('content_top') ?>
 <?= $body ?>
+<?= $renderAd('content_bottom') ?>
 </main>
+
+<?= $renderAd('global_footer') ?>
 
 <footer class="site-footer">
     <div class="container footer-grid">
@@ -170,6 +186,39 @@ $pageFixed=!empty($dsPage['fixed']);
         <div class="container">© <?= date('Y') ?> <?= $e($appName) ?> · Omega MU CMS 2.0 v0.24.0</div>
     </div>
 </footer>
+<?php
+$mcSettings=$monetizationContext['settings']??[];
+if(!empty($monetizationContext['showConsent'])):
+    $policy=trim((string)($mcSettings['consent_policy_url']??''));
+?>
+<div class="omega-consent" data-omega-consent role="dialog" aria-label="<?= $e((string)($mcSettings['consent_title']??'Privacidad y cookies')) ?>">
+    <div class="omega-consent-card">
+        <div>
+            <strong><?= $e((string)($mcSettings['consent_title']??'Privacidad y cookies')) ?></strong>
+            <p><?= $e((string)($mcSettings['consent_text']??'')) ?></p>
+            <?php if($policy!==''): ?><a href="<?= $e($policy) ?>">Política de privacidad</a><?php endif; ?>
+        </div>
+        <div class="omega-consent-actions">
+            <button type="button" class="btn btn-ghost" data-consent-reject>Solo necesarias</button>
+            <button type="button" class="btn btn-ghost" data-consent-config>Configurar</button>
+            <button type="button" class="btn btn-primary" data-consent-accept>Aceptar todas</button>
+        </div>
+    </div>
+    <div class="omega-consent-modal" data-consent-modal>
+        <div class="omega-consent-modal-card">
+            <button type="button" class="omega-consent-close" data-consent-close aria-label="Cerrar">×</button>
+            <span class="eyebrow">PREFERENCIAS</span>
+            <h3>Configurar cookies</h3>
+            <label class="omega-consent-option"><input type="checkbox" checked disabled><span><strong>Necesarias</strong><small>Sesión, seguridad y funcionamiento del CMS.</small></span></label>
+            <label class="omega-consent-option"><input type="checkbox" name="consent_analytics"><span><strong>Analytics</strong><small>Medición de visitas y rendimiento mediante Google.</small></span></label>
+            <label class="omega-consent-option"><input type="checkbox" name="consent_ads"><span><strong>Publicidad</strong><small>Permite cargar AdSense y bloques publicitarios de terceros.</small></span></label>
+            <label class="omega-consent-option"><input type="checkbox" name="consent_personalization"><span><strong>Personalización</strong><small>Preferencias opcionales para experiencias personalizadas.</small></span></label>
+            <button type="button" class="btn btn-primary" data-consent-save>Guardar preferencias</button>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
 <?php if(($dsPage['type']??'')==='random' && count($pageUrls)>1 && (int)($dsPage['rotation']??0)>0): ?>
 <script>
 document.addEventListener('DOMContentLoaded',function(){
