@@ -67,7 +67,7 @@ $initial=strtoupper(substr($adminName!==''?$adminName:'A',0,1));
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="dark">
 <title><?= $e($adminTitle??'AdminCP') ?> · Omega MU CMS</title>
-<link rel="stylesheet" href="/public/assets/css/omega.css?v=271">
+<link rel="stylesheet" href="/public/assets/css/omega.css?v=273">
 </head>
 <body class="omega-admin-enterprise">
 
