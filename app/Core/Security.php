@@ -4,7 +4,7 @@ namespace Omega\Core;
 
 final class Security
 {
-    public static function headers(bool $googleServices=false): void
+    public static function headers(bool $googleServices=false,bool $hcaptcha=false): void
     {
         header('X-Content-Type-Options: nosniff');
         header('Referrer-Policy: strict-origin-when-cross-origin');
@@ -20,7 +20,15 @@ final class Security
             $frame.=" https://googleads.g.doubleclick.net https://tpc.googlesyndication.com";
         }
 
-        header("Content-Security-Policy: default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; script-src {$script}; connect-src {$connect}; frame-src {$frame}; frame-ancestors 'none'; base-uri 'self'; form-action 'self'");
+        $style="'self' 'unsafe-inline'";
+        if ($hcaptcha) {
+            $script.=" https://hcaptcha.com https://*.hcaptcha.com";
+            $connect.=" https://hcaptcha.com https://*.hcaptcha.com";
+            $frame.=" https://hcaptcha.com https://*.hcaptcha.com";
+            $style.=" https://hcaptcha.com https://*.hcaptcha.com";
+        }
+
+        header("Content-Security-Policy: default-src 'self'; img-src 'self' data: https:; style-src {$style}; script-src {$script}; connect-src {$connect}; frame-src {$frame}; frame-ancestors 'none'; base-uri 'self'; form-action 'self'");
         header('X-Frame-Options: DENY');
     }
 
