@@ -12,8 +12,18 @@ document.addEventListener('DOMContentLoaded', function () {
     const ga4=meta('omega-ga4-id');
     const adsId=meta('omega-google-ads-id');
     const adsense=meta('omega-adsense-client') || document.querySelector('ins.adsbygoogle')?.dataset.adClient || '';
+    const analyticsGranted=meta('omega-consent-analytics')==='1';
+    const adsGranted=meta('omega-consent-ads')==='1';
+    const personalizationGranted=meta('omega-consent-personalization')==='1';
 
     window.dataLayer = window.dataLayer || [];
+    window.gtag = window.gtag || function(){ window.dataLayer.push(arguments); };
+    window.gtag('consent','default',{
+        analytics_storage: analyticsGranted ? 'granted' : 'denied',
+        ad_storage: adsGranted ? 'granted' : 'denied',
+        ad_user_data: adsGranted ? 'granted' : 'denied',
+        ad_personalization: personalizationGranted ? 'granted' : 'denied'
+    });
 
     if (gtm) {
         window.dataLayer.push({'gtm.start':Date.now(),event:'gtm.js'});
@@ -21,7 +31,6 @@ document.addEventListener('DOMContentLoaded', function () {
     } else if (ga4 || adsId) {
         const first=ga4 || adsId;
         loadScript('https://www.googletagmanager.com/gtag/js?id='+encodeURIComponent(first));
-        window.gtag = window.gtag || function(){ window.dataLayer.push(arguments); };
         window.gtag('js', new Date());
         if (ga4) window.gtag('config',ga4);
         if (adsId) window.gtag('config',adsId);
