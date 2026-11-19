@@ -14,8 +14,10 @@ final class OmegaWebShopService
     private const DELIVERIES='cms_webshop_deliveries';
     private const AUDIT='cms_webshop_audit';
 
-    public function __construct(private readonly Database $db)
-    {
+    public function __construct(
+        private readonly Database $db,
+        private readonly Database $muDb
+    ) {
         $this->ensureSchema();
     }
 
@@ -561,7 +563,7 @@ final class OmegaWebShopService
 
     private function accountOnline(string $account): bool
     {
-        $row=$this->db->fetchOne(
+        $row=$this->muDb->fetchOne(
             "SELECT TOP 1 ConnectStat FROM dbo.MEMB_STAT WHERE memb___id=:a",
             ['a'=>$account]
         );
