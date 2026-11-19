@@ -1302,6 +1302,16 @@ try {
             }
             $redirect('/admin/modules');
         }
+        if ($path === '/admin/modules/register' && $method === 'POST') {
+            $requireCsrf();
+            try {
+                $result=$modulePackages->registerDiscovered((string)($_POST['slug']??''));
+                $_SESSION['_flash_success']='Módulo '.$result['manifest']['name'].' v'.$result['manifest']['version'].' registrado correctamente.';
+            } catch(Throwable $e) {
+                $_SESSION['_flash_error']=$e->getMessage();
+            }
+            $redirect('/admin/modules');
+        }
         if ($path === '/admin/modules/toggle' && $method === 'POST') {
             $requireCsrf();
             $adminManager->setModuleEnabled(
