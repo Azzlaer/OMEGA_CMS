@@ -167,6 +167,9 @@ return static function(string $hook,array $payload,array $config,array $context)
             $balance=$service->adjustCredits($account,$amount,(string)($data['note']??'Ajuste AdminCP'),'ADMIN');
             return 'Saldo actualizado. Nuevo saldo de '.$account.': '.$balance.'.';
         }
+        if($action==='process_delivery'){
+            return $service->processDelivery((int)($data['delivery_id']??0));
+        }
         if($action==='runtime_check'){
             $d=$service->diagnostic();
             return 'WebShop runtime activo · categorías '.$d['categories'].' · productos '.$d['products'].' · wallets '.$d['wallets'].' · entregas pendientes '.$d['pending_deliveries'].'.';
@@ -240,7 +243,7 @@ return static function(string $hook,array $payload,array $config,array $context)
 <input type="hidden" name="_csrf" value="<?= $token ?>"><input type="hidden" name="slug" value="webshop-pro"><input type="hidden" name="module_action" value="save_product">
 <div class="wsa-two"><label>Nombre<input name="Name" required></label><label>Slug<input name="Slug"></label></div>
 <div class="wsa-two"><label>Categoría<select name="CategoryId"><option value="">General</option><?php foreach($categories as $c): ?><option value="<?= (int)$c['CategoryId'] ?>"><?= $e((string)$c['Name']) ?></option><?php endforeach; ?></select></label>
-<label>Tipo<select name="ProductType"><option>ITEM</option><option>VIP</option><option>RESET</option><option>ZEN</option><option>UNBAN</option><option>CREDITS</option></select></label></div>
+<label>Tipo<select name="ProductType"><option>ITEM</option><option>VIP</option><option>RESET</option><option>ZEN</option><option>UNBAN</option></select></label></div>
 <div class="wsa-two"><label>Precio Credits<input type="number" name="PriceCredits" min="0" value="100"></label><label>Stock (vacío=ilimitado)<input type="number" name="Stock" min="0"></label></div>
 <label>Descripción<textarea name="Description"></textarea></label>
 <label>Imagen URL<input name="ImageUrl"></label>
@@ -270,8 +273,15 @@ return static function(string $hook,array $payload,array $config,array $context)
 
 <section class="wsa-box" style="margin-top:14px">
 <h3>Entregas pendientes</h3>
-<table class="wsa-table"><thead><tr><th>#</th><th>Orden</th><th>Cuenta</th><th>Tipo</th><th>Estado</th></tr></thead><tbody>
-<?php foreach($pending as $d): ?><tr><td><?= (int)$d['DeliveryId'] ?></td><td><?= (int)$d['OrderId'] ?></td><td><?= $e((string)$d['AccountId']) ?></td><td><?= $e((string)$d['DeliveryType']) ?></td><td><?= $e((string)$d['Status']) ?></td></tr><?php endforeach; ?>
+<table class="wsa-table"><thead><tr><th>#</th><th>Orden</th><th>Cuenta</th><th>Tipo</th><th>Estado</th><th>Acción</th></tr></thead><tbody>
+<?php foreach($pending as $d): ?><tr><td><?= (int)$d['DeliveryId'] ?></td><td><?= (int)$d['OrderId'] ?></td><td><?= $e((string)$d['AccountId']) ?></td><td><?= $e((string)$d['DeliveryType']) ?></td><td><?= $e((string)$d['Status']) ?></td><td>
+<?php if(in_array((string)$d['DeliveryType'],['VIP','ZEN','UNBAN'],true)): ?>
+<form method="post" action="/admin/modules/action">
+<input type="hidden" name="_csrf" value="<?= $token ?>"><input type="hidden" name="slug" value="webshop-pro"><input type="hidden" name="module_action" value="process_delivery"><input type="hidden" name="delivery_id" value="<?= (int)$d['DeliveryId'] ?>">
+<button class="btn btn-primary" type="submit">Procesar</button>
+</form>
+<?php else: ?><span class="muted-text">Pendiente de integrador</span><?php endif; ?>
+</td></tr><?php endforeach; ?>
 </tbody></table>
 </section>
 <?php
