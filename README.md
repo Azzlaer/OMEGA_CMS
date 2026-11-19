@@ -908,6 +908,30 @@ Animación del título de la pestaña:
 
 ---
 
+## Live Traffic & Visitor Counter PRO
+
+**Versión:** 1.0.0  
+**Autor:** Omega MU CMS / LatinBattle.com
+
+Analítica ligera y contador de visitas nativo, inspirado en los widgets públicos de tráfico en tiempo real pero sin enviar IPs a terceros.
+
+Incluye:
+
+- Visitantes online mediante heartbeat.
+- Visitantes únicos de hoy.
+- Visitantes únicos históricos.
+- Pageviews de hoy y totales.
+- Desktop / Mobile / Other.
+- Ocho estilos de contador.
+- Footer, inicio/final del contenido o pestaña flotante.
+- Ignorar bots/crawlers conocidos.
+- Cookie first-party y almacenamiento únicamente de hash HMAC.
+- API live propia mediante `/module-api/live-traffic-counter-pro/stats`.
+
+No realiza geolocalización en la versión 1.0.0 para evitar compartir IPs con proveedores externos.
+
+---
+
 ## VIP Membership Pro
 
 **Versión:** 1.0.1  
