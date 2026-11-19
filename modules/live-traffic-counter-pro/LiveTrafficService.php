@@ -106,7 +106,7 @@ final class OmegaLiveTrafficService
         if(!preg_match('/^#[0-9a-f]{6}$/i',$accent)) $accent='#d5a33d';
 
         $label=trim(strip_tags((string)($input['label']??'Visitantes')));
-        $label=mb_substr($label,0,60);
+        $label=substr($label,0,60);
 
         $values=[
             'enabled'=>!empty($input['enabled'])?'1':'0',
@@ -152,7 +152,7 @@ final class OmegaLiveTrafficService
 
         $hash=$this->visitorHash();
         if($hash==='') return;
-        $path=mb_substr($path,0,500);
+        $path=substr($path,0,500);
         $device=$this->deviceType($ua);
 
         $this->db->execute("
