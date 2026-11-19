@@ -1,0 +1,23 @@
+{
+  "name": "Live Traffic & Visitor Counter PRO",
+  "slug": "live-traffic-counter-pro",
+  "version": "1.0.0",
+  "author": "Omega MU CMS / LatinBattle.com",
+  "description": "Contador de visitas y tráfico en tiempo real nativo para OMEGA CMS: visitantes online, únicos, visitas de hoy, pageviews, dispositivos y múltiples estilos de widget.",
+  "minimum_core": "0.18.0",
+  "enabled_by_default": false,
+  "category": "analytics",
+  "actions": [
+    {
+      "key": "runtime_check",
+      "label": "Diagnóstico",
+      "help": "Muestra métricas actuales y confirma que el runtime está activo."
+    },
+    {
+      "key": "reset_stats",
+      "label": "Reiniciar estadísticas",
+      "help": "Elimina estadísticas históricas del módulo."
+    }
+  ],
+  "config_schema": []
+}
