@@ -25,7 +25,14 @@ $error=$error??null; $success=$success??null;
 <?php if($m['installed']): ?>
 <a class="btn btn-ghost" href="/admin/modules/<?= rawurlencode($m['slug']) ?>">Ver / Configurar</a>
 <form method="post" action="/admin/modules/toggle"><input type="hidden" name="_csrf" value="<?= $e(Csrf::token()) ?>"><input type="hidden" name="slug" value="<?= $e($m['slug']) ?>"><input type="hidden" name="name" value="<?= $e($m['name']) ?>"><input type="hidden" name="version" value="<?= $e($m['version']) ?>"><input type="hidden" name="enabled" value="<?= $m['is_enabled']?'0':'1' ?>"><button class="btn <?= $m['is_enabled']?'btn-ghost':'btn-primary' ?>"><?= $m['is_enabled']?'Desactivar':'Activar' ?></button></form>
-<?php else: ?><span class="muted-text">Detectado pero no registrado</span><?php endif; ?>
+<?php else: ?>
+<form method="post" action="/admin/modules/register">
+<input type="hidden" name="_csrf" value="<?= $e(Csrf::token()) ?>">
+<input type="hidden" name="slug" value="<?= $e($m['slug']) ?>">
+<button class="btn btn-primary" type="submit">Registrar módulo</button>
+</form>
+<span class="muted-text">Detectado en /modules, pendiente de registro</span>
+<?php endif; ?>
 </div>
 </article>
 <?php endforeach; ?>

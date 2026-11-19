@@ -175,6 +175,40 @@ if (preg_match('#^/module-assets/([a-z0-9_-]{3,80})/(.+)$#',$path,$am)) {
 // cPanel puede servir /index.php directamente.
 if ($path === '/index.php') $path = '/';
 
+// Public read-only API for enabled modules.
+// Example: /module-api/live-traffic-counter-pro/stats
+if (preg_match('#^/module-api/([a-z0-9_-]{3,80})/([a-z0-9_-]{1,80})$#',$path,$mm)) {
+    header('Content-Type: application/json; charset=utf-8');
+    header('Cache-Control: no-store, max-age=0');
+
+    if ($method !== 'GET') {
+        http_response_code(405);
+        echo json_encode(['error'=>'METHOD_NOT_ALLOWED'],JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    try {
+        $result=$moduleRuntime->invoke($mm[1],'public.api',[
+            'action'=>$mm[2],
+            'query'=>$_GET,
+            'path'=>$path,
+            'client_ip'=>$clientIp,
+        ]);
+
+        if(!is_array($result)){
+            http_response_code(404);
+            echo json_encode(['error'=>'MODULE_API_NOT_FOUND'],JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        echo json_encode($result,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+    } catch(Throwable $e) {
+        http_response_code(404);
+        echo json_encode(['error'=>'MODULE_API_NOT_FOUND'],JSON_UNESCAPED_UNICODE);
+    }
+    exit;
+}
+
 if ($path === '/ads.txt') {
     $adsTxt=$monetization->adsTxt();
     if ($adsTxt===null) {
@@ -1263,6 +1297,16 @@ try {
             try {
                 $result=$modulePackages->installUploaded($_FILES['module_zip']??[]);
                 $_SESSION['_flash_success']='Módulo '.$result['manifest']['name'].' v'.$result['manifest']['version'].' instalado correctamente.';
+            } catch(Throwable $e) {
+                $_SESSION['_flash_error']=$e->getMessage();
+            }
+            $redirect('/admin/modules');
+        }
+        if ($path === '/admin/modules/register' && $method === 'POST') {
+            $requireCsrf();
+            try {
+                $result=$modulePackages->registerDiscovered((string)($_POST['slug']??''));
+                $_SESSION['_flash_success']='Módulo '.$result['manifest']['name'].' v'.$result['manifest']['version'].' registrado correctamente.';
             } catch(Throwable $e) {
                 $_SESSION['_flash_error']=$e->getMessage();
             }
