@@ -153,6 +153,48 @@ final class ModulePackageManager
         ];
     }
 
+    public function registerDiscovered(string $slug): array
+    {
+        $this->ensureSchema();
+        $slug=$this->validateSlug($slug);
+
+        $target=rtrim($this->modulesDir,'/\\').DIRECTORY_SEPARATOR.$slug;
+        $manifestFile=$target.DIRECTORY_SEPARATOR.'module.json';
+
+        if(!is_dir($target) || !is_file($manifestFile)){
+            throw new RuntimeException('El módulo detectado no contiene module.json.');
+        }
+
+        $manifest=$this->loadManifest($manifestFile);
+
+        $known=$this->cmsDb->fetchOne("SELECT slug FROM cms_modules WHERE slug=:s",['s'=>$slug]);
+        if($known){
+            throw new RuntimeException('El módulo ya está registrado.');
+        }
+
+        $files=[];
+        $iterator=new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($target,\FilesystemIterator::SKIP_DOTS)
+        );
+
+        foreach($iterator as $file){
+            if(!$file->isFile()) continue;
+            $full=$file->getPathname();
+            $relative=str_replace('\\','/',substr($full,strlen($target)+1));
+            $this->assertSafeRelativePath($relative);
+            $files[]=$relative;
+        }
+
+        sort($files);
+        $this->registerInstalled($manifest,$target,$files);
+        $this->invalidatePhpCache($target);
+
+        return [
+            'manifest'=>$manifest,
+            'files'=>$files,
+        ];
+    }
+
     public function uninstall(string $slug): void
     {
         $this->ensureSchema();
