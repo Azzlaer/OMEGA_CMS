@@ -150,11 +150,8 @@ final class OmegaLiveTrafficService
         $ua=(string)($_SERVER['HTTP_USER_AGENT']??'');
         if(($s['exclude_bots']??'1')==='1' && $this->isBot($ua)) return;
 
-        $token=$this->visitorToken();
-        if($token==='') return;
-
-        $key=(string)Env::get('APP_KEY','omega-traffic');
-        $hash=hash_hmac('sha256',$token,$key);
+        $hash=$this->visitorHash();
+        if($hash==='') return;
         $path=mb_substr($path,0,500);
         $device=$this->deviceType($ua);
 
@@ -196,11 +193,13 @@ final class OmegaLiveTrafficService
         $s=$this->settings();
         $window=max(1,min(60,(int)($s['online_window']??5)));
 
+        $threshold=gmdate('Y-m-d H:i:s',time()-($window*60));
+
         $online=(int)($this->db->fetchOne("
             SELECT COUNT(*) AS n
             FROM dbo.cms_traffic_visitors
-            WHERE last_seen>=DATEADD(MINUTE,-:m,SYSUTCDATETIME())
-        ",['m'=>$window])['n']??0);
+            WHERE last_seen>=:threshold
+        ",['threshold'=>$threshold])['n']??0);
 
         $total=(int)($this->db->fetchOne("
             SELECT COUNT(*) AS n FROM dbo.cms_traffic_visitors
@@ -220,9 +219,9 @@ final class OmegaLiveTrafficService
         foreach($this->db->fetchAll("
             SELECT COALESCE(device_type,'other') AS device_type,COUNT(*) AS n
             FROM dbo.cms_traffic_visitors
-            WHERE last_seen>=DATEADD(MINUTE,-:m,SYSUTCDATETIME())
+            WHERE last_seen>=:threshold
             GROUP BY COALESCE(device_type,'other')
-        ",['m'=>$window]) as $row){
+        ",['threshold'=>$threshold]) as $row){
             $k=(string)($row['device_type']??'other');
             if(!array_key_exists($k,$devices)) $k='other';
             $devices[$k]=(int)($row['n']??0);
@@ -240,10 +239,37 @@ final class OmegaLiveTrafficService
         ];
     }
 
+    public function heartbeat(): void
+    {
+        $hash=$this->visitorHash();
+        if($hash==='') return;
+
+        $this->db->execute("
+            UPDATE dbo.cms_traffic_visitors
+               SET last_seen=SYSUTCDATETIME()
+             WHERE visitor_hash=:h
+        ",['h'=>$hash]);
+
+        $this->db->execute("
+            UPDATE dbo.cms_traffic_daily
+               SET last_seen=SYSUTCDATETIME()
+             WHERE visit_day=CONVERT(date,SYSDATETIME())
+               AND visitor_hash=:h
+        ",['h'=>$hash]);
+    }
+
     public function reset(): void
     {
         $this->db->execute("DELETE FROM dbo.cms_traffic_daily");
         $this->db->execute("DELETE FROM dbo.cms_traffic_visitors");
+    }
+
+    private function visitorHash(): string
+    {
+        $token=$this->visitorToken();
+        if($token==='') return '';
+        $key=(string)Env::get('APP_KEY','omega-traffic');
+        return hash_hmac('sha256',$token,$key);
     }
 
     private function visitorToken(): string
