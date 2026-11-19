@@ -292,7 +292,7 @@ final class OmegaWebShopService
     {
         $id=max(0,(int)($p['ProductId']??0));
         $type=strtoupper(trim((string)($p['ProductType']??'ITEM')));
-        if(!in_array($type,['ITEM','VIP','RESET','ZEN','UNBAN','CREDITS'],true)){
+        if(!in_array($type,['ITEM','VIP','RESET','ZEN','UNBAN'],true)){
             throw new RuntimeException('Tipo de producto no soportado.');
         }
 
@@ -539,6 +539,105 @@ final class OmegaWebShopService
         );
     }
 
+    public function processDelivery(int $deliveryId): string
+    {
+        $delivery=$this->db->fetchOne(
+            "SELECT d.*,o.ProductName,o.ProductType
+               FROM dbo.".self::DELIVERIES." d
+               INNER JOIN dbo.".self::ORDERS." o ON o.OrderId=d.OrderId
+              WHERE d.DeliveryId=:id",
+            ['id'=>$deliveryId]
+        );
+        if(!$delivery) throw new RuntimeException('Entrega no encontrada.');
+        if((string)$delivery['Status']!=='PENDING') throw new RuntimeException('La entrega ya fue procesada.');
+
+        $account=(string)$delivery['AccountId'];
+        $type=strtoupper((string)$delivery['DeliveryType']);
+        $payload=json_decode((string)($delivery['PayloadJson']??'{}'),true);
+        if(!is_array($payload)) $payload=[];
+
+        if($this->accountOnline($account)){
+            throw new RuntimeException('La cuenta debe estar desconectada del juego para procesar la entrega.');
+        }
+
+        if($type==='VIP'){
+            $level=max(1,(int)($payload['account_level']??1));
+            $days=max(1,(int)($payload['days']??30));
+
+            $row=$this->muDb->fetchOne(
+                "SELECT AccountExpireDate FROM dbo.MEMB_INFO WHERE memb___id=:a",
+                ['a'=>$account]
+            );
+            if(!$row) throw new RuntimeException('Cuenta MU no encontrada.');
+
+            $base=time();
+            $current=(string)($row['AccountExpireDate']??'');
+            $ts=$current!==''?strtotime($current):false;
+            if($ts!==false && $ts>$base) $base=$ts;
+            $expires=date('Y-m-d H:i:s',$base+($days*86400));
+
+            $this->muDb->execute(
+                "UPDATE dbo.MEMB_INFO
+                    SET AccountLevel=:lvl,AccountExpireDate=:exp
+                  WHERE memb___id=:a",
+                ['lvl'=>$level,'exp'=>$expires,'a'=>$account]
+            );
+        } elseif($type==='ZEN'){
+            $amount=max(1,(int)($payload['amount']??0));
+            $row=$this->muDb->fetchOne(
+                "SELECT Money FROM dbo.warehouse WITH(UPDLOCK,HOLDLOCK) WHERE AccountID=:a",
+                ['a'=>$account]
+            );
+            if(!$row) throw new RuntimeException('Warehouse no encontrado para la cuenta.');
+            $next=min(2000000000,max(0,(int)($row['Money']??0))+$amount);
+            $this->muDb->execute(
+                "UPDATE dbo.warehouse SET Money=:m WHERE AccountID=:a",
+                ['m'=>$next,'a'=>$account]
+            );
+        } elseif($type==='UNBAN'){
+            $exists=$this->muDb->fetchOne(
+                "SELECT memb___id FROM dbo.MEMB_INFO WHERE memb___id=:a",
+                ['a'=>$account]
+            );
+            if(!$exists) throw new RuntimeException('Cuenta MU no encontrada.');
+            $this->muDb->execute(
+                "UPDATE dbo.MEMB_INFO SET bloc_code='0' WHERE memb___id=:a",
+                ['a'=>$account]
+            );
+        } elseif($type==='ITEM'){
+            throw new RuntimeException('Entrega ITEM pendiente del inserter seguro de Warehouse/seriales.');
+        } elseif($type==='RESET'){
+            throw new RuntimeException('Entrega RESET pendiente del selector seguro de personaje.');
+        } else {
+            throw new RuntimeException('Tipo de entrega no soportado por el procesador actual.');
+        }
+
+        $this->db->transaction(function(Database $db) use($deliveryId,$delivery,$type): void {
+            $db->execute(
+                "UPDATE dbo.".self::DELIVERIES."
+                    SET Status='COMPLETED',ClaimedAt=SYSUTCDATETIME(),Notes=:n
+                  WHERE DeliveryId=:id",
+                ['n'=>'Procesado por WebShop PRO: '.$type,'id'=>$deliveryId]
+            );
+            $db->execute(
+                "UPDATE dbo.".self::ORDERS."
+                    SET Status='COMPLETED',CompletedAt=SYSUTCDATETIME(),ErrorMessage=NULL
+                  WHERE OrderId=:oid",
+                ['oid'=>$delivery['OrderId']]
+            );
+            $db->execute("
+                INSERT INTO dbo.".self::AUDIT."
+                    (AccountId,ActionCode,ObjectType,ObjectId,Details)
+                VALUES(:a,'DELIVERY_COMPLETED','DELIVERY',:id,:d)
+            ",[
+                'a'=>$delivery['AccountId'],'id'=>$deliveryId,
+                'd'=>'Entrega '.$type.' completada.'
+            ]);
+        });
+
+        return 'Entrega #'.$deliveryId.' procesada correctamente.';
+    }
+
     public function diagnostic(): array
     {
         $s=$this->settings();
@@ -584,8 +683,7 @@ final class OmegaWebShopService
             'RESET'=>['amount'=>max(1,(int)($p['ResetAmount']??1)),'character'=>$this->text((string)($p['CharacterName']??''),10)],
             'ZEN'=>['amount'=>max(1,(int)($p['ZenAmount']??1))],
             'UNBAN'=>['clear_bloc_code'=>true],
-            'CREDITS'=>['amount'=>max(1,(int)($p['CreditAmount']??1))],
-            default=>[],
+             default=>[],
         };
     }
 
