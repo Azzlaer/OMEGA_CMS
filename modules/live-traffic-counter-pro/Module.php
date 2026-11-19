@@ -45,6 +45,7 @@ return static function(string $hook,array $payload,array $config,array $context)
     if($hook==='public.api'){
         $action=(string)($payload['action']??'');
         if($action==='stats'){
+            $service->heartbeat();
             return ['ok'=>true,'stats'=>$service->stats()];
         }
         return null;
