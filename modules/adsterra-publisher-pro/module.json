@@ -1,0 +1,64 @@
+{
+  "name": "Adsterra Publisher Center PRO",
+  "slug": "adsterra-publisher-pro",
+  "version": "1.1.0",
+  "author": "Omega MU CMS / LatinBattle.com",
+  "description": "Centro Publisher para Adsterra: despliegue seguro de ad units, Smartlinks, reglas por ruta/audiencia/dispositivo y estadísticas vía Publisher API.",
+  "minimum_core": "0.18.0",
+  "enabled_by_default": false,
+  "category": "monetization",
+  "config_schema": [
+    {
+      "key": "api_enabled",
+      "label": "Activar Publisher API",
+      "type": "boolean",
+      "default": false,
+      "help": "Permite consultar estadísticas desde Adsterra."
+    },
+    {
+      "key": "api_key",
+      "label": "Publisher API Key",
+      "type": "secret",
+      "default": "",
+      "help": "Token generado en Adsterra. Se cifra con APP_KEY y nunca se muestra en HTML."
+    },
+    {
+      "key": "stats_days",
+      "label": "Días del dashboard",
+      "type": "integer",
+      "default": 7,
+      "min": 1,
+      "max": 90
+    },
+    {
+      "key": "hide_logged",
+      "label": "Ocultar anuncios a usuarios logueados",
+      "type": "boolean",
+      "default": false
+    },
+    {
+      "key": "hide_admin",
+      "label": "Ocultar anuncios a administradores",
+      "type": "boolean",
+      "default": true
+    },
+    {
+      "key": "respect_consent",
+      "label": "Respetar consentimiento publicitario de OMEGA",
+      "type": "boolean",
+      "default": true
+    }
+  ],
+  "actions": [
+    {
+      "key": "api_test",
+      "label": "Probar Publisher API",
+      "help": "Comprueba el token contra el endpoint de dominios de Adsterra."
+    },
+    {
+      "key": "runtime_check",
+      "label": "Diagnóstico",
+      "help": "Comprueba unidades, CSP y configuración del módulo."
+    }
+  ]
+}

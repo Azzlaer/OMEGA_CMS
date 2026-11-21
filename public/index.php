@@ -81,7 +81,14 @@ $guideManager->ensureSchema();
 $monetization = new MonetizationCenter($cmsDb);
 $monetization->ensureSchema();
 $hcaptcha = new HCaptchaService();
-Security::headers($monetization->securityGoogleEnabled(),$hcaptcha->enabled());
+$moduleCspOrigins=[];
+try{
+    if($moduleRuntime->isEnabled('adsterra-publisher-pro')){
+        $csp=$moduleRuntime->invoke('adsterra-publisher-pro','security.csp',[]);
+        if(is_array($csp)) $moduleCspOrigins=$csp;
+    }
+}catch(Throwable){}
+Security::headers($monetization->securityGoogleEnabled(),$hcaptcha->enabled(),$moduleCspOrigins);
 $appName = (string)($appConfig['name'] ?? 'Omega MU');
 $modules = (new ModuleManager($root.'/modules'))->discover();
 
@@ -91,17 +98,32 @@ function renderPage(string $root, string $appName, Driver $driver, AccountAuth $
     try { $stats = $driver->statistics(); }
     catch (Throwable $e) { $stats = ['online'=>0,'accounts'=>0,'characters'=>0,'guilds'=>0]; }
 
-    $moduleHeadHtml='';
-    try {
-        $moduleHeadHtml=$moduleRuntime->invokeAllCollect('site.head',[
-            'template'=>$template
-        ]);
-    } catch (Throwable) {}
-
     $body = View::render($template, $data + ['stats'=>$stats]);
     $loggedAccount=$auth->currentId();
     $isAdmin=$adminAccess->isAdmin($loggedAccount);
     $requestPath=parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+
+    $moduleContext=[
+        'template'=>$template,
+        'path'=>$requestPath,
+        'logged'=>$loggedAccount,
+        'is_admin'=>$isAdmin
+    ];
+
+    $moduleHeadHtml='';
+    try {
+        $moduleHeadHtml=$moduleRuntime->invokeAllCollect('site.head',$moduleContext);
+    } catch (Throwable) {}
+
+    $moduleZones=[];
+    foreach(['global_header','below_navigation','content_top','content_bottom','global_footer'] as $zone){
+        try{
+            $moduleZones[$zone]=$moduleRuntime->invokeAllCollect('site.zone',$moduleContext+['zone'=>$zone]);
+        }catch(Throwable){
+            $moduleZones[$zone]='';
+        }
+    }
+
     $monetizationContext=$monetization->publicContext($loggedAccount,$isAdmin,$requestPath);
 
     return View::render('layout', [
@@ -114,6 +136,7 @@ function renderPage(string $root, string $appName, Driver $driver, AccountAuth $
         'loggedAccount'=>$loggedAccount,
         'isAdmin'=>$isAdmin,
         'moduleHeadHtml'=>$moduleHeadHtml,
+        'moduleZones'=>$moduleZones,
         'monetization'=>$monetization,
         'monetizationContext'=>$monetizationContext,
         'design'=>$designStudio->publicContext(
