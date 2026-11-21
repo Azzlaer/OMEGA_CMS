@@ -160,7 +160,11 @@ final class OmegaAdsterraPublisherService
             )
         ",$params);
 
-        return (int)($this->db->fetchOne("SELECT CAST(SCOPE_IDENTITY() AS BIGINT) id")['id']??0);
+        $row=$this->db->fetchOne(
+            "SELECT TOP 1 Id FROM dbo.".self::UNITS." WHERE Name=:n AND FormatCode=:f ORDER BY Id DESC",
+            ['n'=>$name,'f'=>$format]
+        );
+        return (int)($row['Id']??0);
     }
 
     public function deleteUnit(int $id): void
@@ -250,8 +254,11 @@ final class OmegaAdsterraPublisherService
             throw new RuntimeException('Configura y activa el Publisher API Key del módulo.');
         }
         $response=$this->request('domains.csv',[],false,60);
+        if($response['status']!==200){
+            throw new RuntimeException('Adsterra Publisher API respondió HTTP '.$response['status'].'.');
+        }
         return [
-            'ok'=>$response['status']===200,
+            'ok'=>true,
             'status'=>$response['status'],
             'preview'=>substr((string)$response['body'],0,240)
         ];
@@ -323,7 +330,11 @@ final class OmegaAdsterraPublisherService
             WHERE CacheKey=:k AND ExpiresAt>SYSUTCDATETIME()
         ",['k'=>$cacheKey]);
         if($cached){
-            return ['status'=>(int)$cached['StatusCode'],'body'=>(string)$cached['Payload'],'cached'=>true];
+            $cachedStatus=(int)$cached['StatusCode'];
+            if($cachedStatus<200 || $cachedStatus>=300){
+                throw new RuntimeException('Adsterra Publisher API respondió HTTP '.$cachedStatus.'.');
+            }
+            return ['status'=>$cachedStatus,'body'=>(string)$cached['Payload'],'cached'=>true];
         }
 
         $url=self::API_BASE.'/'.$endpoint;
