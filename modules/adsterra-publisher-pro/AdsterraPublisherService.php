@@ -81,6 +81,45 @@ final class OmegaAdsterraPublisherService
         );
     }
 
+    public function createBannerPreset(array $p): int
+    {
+        $width=(int)($p['BannerWidth']??0);
+        $height=(int)($p['BannerHeight']??0);
+        $key=strtolower(trim((string)($p['BannerKey']??'')));
+        $scriptBase=rtrim(trim((string)($p['BannerScriptBase']??'https://bicea.org/22')),'/');
+
+        if(!in_array([$width,$height],[[320,50],[160,300]],true)){
+            throw new RuntimeException('Tamaño de banner preset no soportado.');
+        }
+        if(!preg_match('/^[a-f0-9]{32}$/',$key)){
+            throw new RuntimeException('La key del banner no tiene un formato válido.');
+        }
+        if(!filter_var($scriptBase,FILTER_VALIDATE_URL) || strtolower((string)parse_url($scriptBase,PHP_URL_SCHEME))!=='https'){
+            throw new RuntimeException('La URL base del script debe ser HTTPS.');
+        }
+
+        $code="<script>\n".
+            "  atOptions = {\n".
+            "    'key' : '".$key."',\n".
+            "    'format' : 'iframe',\n".
+            "    'height' : ".$height.",\n".
+            "    'width' : ".$width.",\n".
+            "    'params' : {}\n".
+            "  };\n".
+            "</script>\n".
+            "<script src=\"".$scriptBase."/".$key."\"></script>";
+
+        $data=$p;
+        $data['Name']=trim((string)($p['Name']??''))!==''?(string)$p['Name']:'Banner '.$width.'x'.$height;
+        $data['FormatCode']='banner';
+        $data['CodeHtml']=$code;
+        $data['SmartlinkUrl']='';
+        $data['CspHosts']=trim((string)($p['CspHosts']??''));
+        $data['Enabled']=1;
+
+        return $this->saveUnit($data);
+    }
+
     public function saveUnit(array $p): int
     {
         $id=max(0,(int)($p['Id']??0));
