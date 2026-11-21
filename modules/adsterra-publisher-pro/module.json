@@ -1,7 +1,7 @@
 {
   "name": "Adsterra Publisher Center PRO",
   "slug": "adsterra-publisher-pro",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "Omega MU CMS / LatinBattle.com",
   "description": "Centro Publisher para Adsterra: despliegue seguro de ad units, Smartlinks, reglas por ruta/audiencia/dispositivo y estadísticas vía Publisher API.",
   "minimum_core": "0.18.0",
