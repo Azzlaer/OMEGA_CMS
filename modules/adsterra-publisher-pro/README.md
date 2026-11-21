@@ -71,3 +71,33 @@ al enlace.
 ## Limitaciones
 
 La Publisher API de Adsterra es actualmente de lectura. La creación/aprobación de websites y ad units se sigue haciendo desde el dashboard de Adsterra.
+
+
+## Banners rápidos v1.1.0
+
+El AdminCP incluye presets directos para dos unidades configuradas:
+
+### Banner 320x50
+
+- Key: `db7c51e2503600358d28fe5dde1df677`
+- Script: `https://bicea.org/22/db7c51e2503600358d28fe5dde1df677`
+- Recomendado para:
+  - Global Header
+  - Debajo de navegación
+  - Inicio del contenido
+  - Final del contenido
+  - Global Footer
+
+### Banner 160x300
+
+- Key: `0b579ac111e6a011e44b71f87ed216fc`
+- Script: `https://bicea.org/22/0b579ac111e6a011e44b71f87ed216fc`
+- Recomendado para:
+  - Inicio del contenido
+  - Final del contenido
+  - Footer
+  - Desktop
+
+Cada preset genera automáticamente el bloque `atOptions`, el `<script src>`, el host CSP `https://bicea.org` y permite seleccionar audiencia, dispositivo, rutas y orden.
+
+El código manual continúa disponible para otros tamaños y formatos.
