@@ -40,6 +40,10 @@ return static function(string $hook,array $payload,array $config,array $context)
         $action=(string)($payload['action']??'');
         $data=(array)($payload['data']??[]);
 
+        if($action==='create_banner_preset'){
+            $id=$service->createBannerPreset($data);
+            return 'Banner Adsterra creado correctamente (#'.$id.').';
+        }
         if($action==='save_unit'){
             $id=$service->saveUnit($data);
             return 'Unidad Adsterra guardada (#'.$id.').';
@@ -133,6 +137,81 @@ return static function(string $hook,array $payload,array $config,array $context)
 <?php endif; ?>
 </section>
 <?php endif; ?>
+
+<section class="asp-box" style="margin-top:14px">
+<h3>⚡ Banners rápidos</h3>
+<div class="asp-note">Crea los banners que ya tienes configurados sin volver a pegar el script. Elige dónde mostrarlos y OMEGA generará automáticamente el bloque <code>atOptions</code> y el script externo.</div>
+
+<div class="asp-grid" style="margin-top:12px">
+<form method="post" action="/admin/modules/action" class="asp-form asp-box" style="margin:0">
+<input type="hidden" name="_csrf" value="<?= $token ?>">
+<input type="hidden" name="slug" value="adsterra-publisher-pro">
+<input type="hidden" name="module_action" value="create_banner_preset">
+<input type="hidden" name="BannerWidth" value="320">
+<input type="hidden" name="BannerHeight" value="50">
+<input type="hidden" name="BannerKey" value="db7c51e2503600358d28fe5dde1df677">
+<input type="hidden" name="BannerScriptBase" value="https://bicea.org/22">
+<input type="hidden" name="CspHosts" value="https://bicea.org">
+<input type="hidden" name="RequiresConsent" value="1">
+
+<h3 style="margin-bottom:4px">Banner 320×50</h3>
+<div class="asp-note">Ideal para header, debajo del menú o footer.</div>
+<label>Nombre<input name="Name" maxlength="140" value="Adsterra Banner 320x50"></label>
+<div class="asp-two">
+<label>Zona
+<select name="PlacementKey">
+<option value="global_header">Global Header</option>
+<option value="below_navigation" selected>Debajo navegación</option>
+<option value="content_top">Inicio contenido</option>
+<option value="content_bottom">Final contenido</option>
+<option value="global_footer">Global Footer</option>
+</select></label>
+<label>Dispositivo
+<select name="Device"><option value="all">Todos</option><option value="mobile">Mobile</option><option value="desktop">Desktop</option></select></label>
+</div>
+<label>Audiencia
+<select name="Audience"><option value="all">Todos</option><option value="guests">Invitados</option><option value="members">Miembros</option></select>
+</label>
+<label>Rutas<input name="PathRule" maxlength="700" placeholder="*"></label>
+<label>Orden<input type="number" name="SortOrder" min="0" max="9999" value="50"></label>
+<button class="btn btn-primary" type="submit">Agregar Banner 320×50</button>
+</form>
+
+<form method="post" action="/admin/modules/action" class="asp-form asp-box" style="margin:0">
+<input type="hidden" name="_csrf" value="<?= $token ?>">
+<input type="hidden" name="slug" value="adsterra-publisher-pro">
+<input type="hidden" name="module_action" value="create_banner_preset">
+<input type="hidden" name="BannerWidth" value="160">
+<input type="hidden" name="BannerHeight" value="300">
+<input type="hidden" name="BannerKey" value="0b579ac111e6a011e44b71f87ed216fc">
+<input type="hidden" name="BannerScriptBase" value="https://bicea.org/22">
+<input type="hidden" name="CspHosts" value="https://bicea.org">
+<input type="hidden" name="RequiresConsent" value="1">
+
+<h3 style="margin-bottom:4px">Banner 160×300</h3>
+<div class="asp-note">Formato vertical para inicio/final del contenido o footer.</div>
+<label>Nombre<input name="Name" maxlength="140" value="Adsterra Banner 160x300"></label>
+<div class="asp-two">
+<label>Zona
+<select name="PlacementKey">
+<option value="global_header">Global Header</option>
+<option value="below_navigation">Debajo navegación</option>
+<option value="content_top" selected>Inicio contenido</option>
+<option value="content_bottom">Final contenido</option>
+<option value="global_footer">Global Footer</option>
+</select></label>
+<label>Dispositivo
+<select name="Device"><option value="all">Todos</option><option value="desktop" selected>Desktop</option><option value="mobile">Mobile</option></select></label>
+</div>
+<label>Audiencia
+<select name="Audience"><option value="all">Todos</option><option value="guests">Invitados</option><option value="members">Miembros</option></select>
+</label>
+<label>Rutas<input name="PathRule" maxlength="700" placeholder="*"></label>
+<label>Orden<input type="number" name="SortOrder" min="0" max="9999" value="60"></label>
+<button class="btn btn-primary" type="submit">Agregar Banner 160×300</button>
+</form>
+</div>
+</section>
 
 <div class="asp-grid" style="margin-top:14px">
 <section class="asp-box">
