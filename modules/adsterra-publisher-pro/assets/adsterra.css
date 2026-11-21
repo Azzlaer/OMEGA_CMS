@@ -1,0 +1,31 @@
+.omega-adsterra-unit{
+    width:min(1180px,calc(100% - 36px));
+    margin:14px auto;
+    text-align:center;
+    position:relative;
+    min-height:1px;
+}
+.omega-adsterra-label{
+    display:block;
+    margin-bottom:5px;
+    color:#657583;
+    font-size:8px;
+    font-weight:800;
+    letter-spacing:.09em;
+    text-transform:uppercase;
+}
+.omega-adsterra-smartlink{
+    padding:10px 12px;
+    border:1px solid #2c3944;
+    border-radius:8px;
+    background:#0e151c;
+}
+.omega-adsterra-smartlink a{
+    color:var(--gold,#d5a33d);
+    font-weight:800;
+    text-decoration:none;
+}
+.omega-adsterra-smartlink a:hover{text-decoration:underline}
+@media(max-width:720px){
+    .omega-adsterra-unit{width:calc(100% - 20px)}
+}
