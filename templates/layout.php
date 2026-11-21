@@ -10,6 +10,8 @@ $serverVersion = $serverVersion ?? 'MuEmu 0.97k';
 $loggedAccount = $loggedAccount ?? null;
 $isAdmin = $isAdmin ?? false;
 $moduleHeadHtml = $moduleHeadHtml ?? '';
+$moduleZones=$moduleZones??[];
+$moduleZone=static fn(string $key): string => (string)($moduleZones[$key]??'');
 $monetization=$monetization??null;
 $monetizationContext=$monetizationContext??['enabled'=>false,'settings'=>[],'showConsent'=>false];
 $renderAd=static function(string $key) use($monetization,$monetizationContext): string {
@@ -146,15 +148,20 @@ $pageFixed=!empty($dsPage['fixed']);
     </nav>
 </header>
 
+<?= $moduleZone('global_header') ?>
 <?= $renderAd('global_header') ?>
+<?= $moduleZone('below_navigation') ?>
 <?= $renderAd('below_navigation') ?>
 
 <main>
+<?= $moduleZone('content_top') ?>
 <?= $renderAd('content_top') ?>
 <?= $body ?>
+<?= $moduleZone('content_bottom') ?>
 <?= $renderAd('content_bottom') ?>
 </main>
 
+<?= $moduleZone('global_footer') ?>
 <?= $renderAd('global_footer') ?>
 
 <footer class="site-footer">
