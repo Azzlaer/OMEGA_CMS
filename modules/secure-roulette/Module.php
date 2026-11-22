@@ -211,7 +211,7 @@ return static function(
         }
 
         if($type==='WCoinP'){
-            $affected=$db->execute(
+            $affected=$tx->execute(
                 "UPDATE dbo.CashShopData
                  SET WCoinP=ISNULL(WCoinP,0)+:amount
                  WHERE AccountID=:account",
@@ -224,7 +224,7 @@ return static function(
         }
 
         if($type==='GoblinPoint'){
-            $affected=$db->execute(
+            $affected=$tx->execute(
                 "UPDATE dbo.CashShopData
                  SET GoblinPoint=ISNULL(GoblinPoint,0)+:amount
                  WHERE AccountID=:account",
@@ -237,7 +237,7 @@ return static function(
         }
 
         if($type==='Credits'){
-            $affected=$db->execute(
+            $affected=$tx->execute(
                 "UPDATE dbo.memb_credits
                  SET credits=ISNULL(credits,0)+:amount
                  WHERE memb___id=:account",
@@ -433,8 +433,7 @@ CSS;
     $backend=$rewardBackendStatus();
 
     if($hook==='site.head'){
-        return '<link rel="stylesheet" href="/module-assets/secure-roulette/assets/roulette-pro.css?v=200">'.
-               '<script defer src="/module-assets/secure-roulette/assets/roulette-pro.js?v=200"></script>';
+        return '<script defer src="/module-assets/secure-roulette/assets/roulette-pro.js?v=200"></script>';
     }
 
     if($hook==='admin.panel'){
