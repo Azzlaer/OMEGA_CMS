@@ -1,7 +1,7 @@
 {
   "name": "Secure Roulette PRO",
   "slug": "secure-roulette",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "author": "Omega MU CMS",
   "description": "Ruleta de premios server-side para OMEGA CMS con probabilidades configurables, costo por giro, límites diarios, campañas, auditoría y estadísticas.",
   "minimum_core": "0.18.0",
