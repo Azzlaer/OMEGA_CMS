@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 /**
  * Omega MU CMS
- * Secure Roulette PRO v2.0.0
+ * Secure Roulette PRO v2.1.0
  *
  * Principios:
  * - el navegador NO decide AccountID;
@@ -405,7 +405,14 @@ return static function(
 .srw .srw-grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:18px}
 .srw .srw-panel{background:linear-gradient(145deg,#121b24,#0d141b);border:1px solid var(--border);border-radius:12px;padding:16px}
 .srw .srw-wheel{position:relative;width:420px;height:420px;max-width:100%;aspect-ratio:1/1;margin:0 auto;border-radius:50%;border:9px solid #8a6b30;box-shadow:0 0 0 5px #211b10,0 0 40px rgba(221,182,90,.09);overflow:hidden;background:#111}
-.srw .srw-wheel-inner{position:absolute;inset:0;border-radius:50%;transition:transform 4.6s cubic-bezier(.12,.65,.11,1)}
+.srw .srw-wheel-inner{position:absolute;inset:0;border-radius:50%;will-change:transform;transform:rotate(0deg)}
+.srw.srw-animating .srw-wheel-inner{transition:transform 5.6s cubic-bezier(.08,.72,.12,1)}
+.srw .srw-pointer{transition:filter .12s ease,transform .12s ease}
+.srw.srw-tick .srw-pointer{transform:translateX(-50%) rotate(-8deg) scale(1.08);filter:drop-shadow(0 0 8px #f5d878)}
+.srw .srw-wheel{transition:box-shadow .25s ease}
+.srw.srw-animating .srw-wheel{box-shadow:0 0 0 5px #211b10,0 0 54px rgba(221,182,90,.28)}
+.srw .srw-prize-pending{opacity:0;transform:translateY(-6px);max-height:0;overflow:hidden;margin:0;padding-top:0;padding-bottom:0;border-width:0;transition:opacity .35s ease,transform .35s ease,max-height .35s ease,margin .35s ease,padding .35s ease}
+.srw.srw-settled .srw-prize-pending{opacity:1;transform:none;max-height:100px;margin-bottom:14px;padding:12px;border-width:1px}
 .srw .srw-wheel-labels{position:absolute;inset:0}
 .srw .srw-seg{position:absolute;left:50%;top:50%;width:45%;transform-origin:0 0;font-size:12px;font-weight:900;color:#fff;text-shadow:0 1px 3px #000;white-space:nowrap}
 .srw .srw-pointer{position:absolute;left:50%;top:-2px;transform:translateX(-50%);z-index:5;width:0;height:0;border-left:18px solid transparent;border-right:18px solid transparent;border-top:0;border-bottom:34px solid #e7c86e;filter:drop-shadow(0 2px 3px #000)}
@@ -433,7 +440,7 @@ CSS;
     $backend=$rewardBackendStatus();
 
     if($hook==='site.head'){
-        return '<script defer src="/module-assets/secure-roulette/assets/roulette-pro.js?v=200"></script>';
+        return '<script defer src="/module-assets/secure-roulette/assets/roulette-pro.js?v=210"></script>';
     }
 
     if($hook==='admin.panel'){
@@ -754,13 +761,14 @@ CSS;
 
     $rotation=0;
     if($wonSlot>0){
-        // Center of target segment at pointer (top), plus 6 full rotations.
+        // Center of target segment at pointer (top), plus 8 full rotations.
+        // El HTML NO se entrega pre-rotado; JS inicia desde 0 y anima hasta aquí.
         $targetCenter=(($wonSlot-1)*45)+22.5;
-        $rotation=2160 + (360 - $targetCenter);
+        $rotation=2880 + (360 - $targetCenter);
     }
 
     $html=$styles();
-    $html.='<div class="srw" data-winning-slot="'.$wonSlot.'" data-winning-rotation="'.$rotation.'">
+    $html.='<div class="srw" data-winning-slot="'.$wonSlot.'" data-winning-rotation="'.$rotation.'" data-spin-duration="5600">
       <div class="srw-hero">
         <span class="eyebrow">MY ACCOUNT · SERVER SIDE</span>
         <h2>🎰 Ruleta Segura</h2>
@@ -768,7 +776,7 @@ CSS;
       </div>';
 
     if($wonSlot>0){
-        $html.='<div class="srw-prize">
+        $html.='<div class="srw-prize'.($wonSlot>0?' srw-prize-pending':'').'">
             🎉 Premio acreditado:
             <strong>'.$e($rewardLabel($wonType)).' +'.number_format($wonAmount,0,',','.').'</strong>
         </div>';
@@ -791,7 +799,7 @@ CSS;
         <div class="srw-wheel">
           <div class="srw-pointer"></div>
           <div class="srw-wheel-inner" id="srwWheel"
-               style="background:'.$e($wheelGradient).';'.($wonSlot>0?'transform:rotate('.$rotation.'deg);':'').'">
+               style="background:'.$e($wheelGradient).';transform:rotate(0deg)">
             <div class="srw-wheel-labels">'.$labels.'</div>
           </div>
           <div class="srw-center">Ω</div>
