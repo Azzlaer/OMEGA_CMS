@@ -180,10 +180,11 @@ return static function(
     };
 
     $creditReward = static function(
+        $tx,
         string $accountId,
         string $type,
         int $amount
-    ) use($db,$rewardBackendStatus): void {
+    ) use($rewardBackendStatus): void {
         $status=$rewardBackendStatus();
 
         if(empty($status[$type])){
@@ -197,7 +198,7 @@ return static function(
         }
 
         if($type==='WCoinC'){
-            $affected=$db->execute(
+            $affected=$tx->execute(
                 "UPDATE dbo.CashShopData
                  SET WCoinC=ISNULL(WCoinC,0)+:amount
                  WHERE AccountID=:account",
@@ -431,6 +432,11 @@ CSS;
     $slots=$rewardSlots();
     $backend=$rewardBackendStatus();
 
+    if($hook==='site.head'){
+        return '<link rel="stylesheet" href="/module-assets/secure-roulette/assets/roulette-pro.css?v=200">'.
+               '<script defer src="/module-assets/secure-roulette/assets/roulette-pro.js?v=200"></script>';
+    }
+
     if($hook==='admin.panel'){
         $logCount=(int)(($db->fetchOne(
             "SELECT COUNT(*) AS total FROM dbo.cms_secure_roulette_log"
@@ -620,7 +626,7 @@ CSS;
                     }
 
                     // Acreditar dentro de la misma transacción SQL.
-                    $creditReward($accountId,$type,$amount);
+                    $creditReward($tx,$accountId,$type,$amount);
 
                     $tx->execute(
                         "UPDATE dbo.cms_secure_roulette_state
@@ -755,7 +761,7 @@ CSS;
     }
 
     $html=$styles();
-    $html.='<div class="srw">
+    $html.='<div class="srw" data-winning-slot="'.$wonSlot.'" data-winning-rotation="'.$rotation.'">
       <div class="srw-hero">
         <span class="eyebrow">MY ACCOUNT · SERVER SIDE</span>
         <h2>🎰 Ruleta Segura</h2>
@@ -834,37 +840,8 @@ CSS;
     </section>
     </div>';
 
-    if($wonSlot>0){
-        $html.='<script>
-        document.addEventListener("DOMContentLoaded",function(){
-            var wheel=document.getElementById("srwWheel");
-            if(!wheel) return;
-            wheel.style.transform="rotate(0deg)";
-            requestAnimationFrame(function(){
-                requestAnimationFrame(function(){
-                    wheel.style.transform="rotate('.$rotation.'deg)";
-                });
-            });
-        });
-        </script>';
-    }
-
-    $html.='<script>
-    document.addEventListener("DOMContentLoaded",function(){
-        var form=document.getElementById("srwForm");
-        if(!form) return;
-        form.addEventListener("submit",function(){
-            var btn=document.getElementById("srwSpinButton");
-            if(btn){
-                btn.disabled=true;
-                btn.textContent="Procesando premio...";
-            }
-        });
-    });
-    </script>';
-
     return [
-        'title'=>'Ruleta Segura',
+        'title'=>'Secure Roulette PRO',
         'html'=>$html
     ];
 };
