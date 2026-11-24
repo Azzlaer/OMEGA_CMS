@@ -419,6 +419,7 @@ try {
         $tvtRanking=null;
         $skyEventCenter=null;
         $bloodCastleCenter=null;
+        $devilSquareCenter=null;
 
         if($type==='tvt'){
             try{
@@ -454,6 +455,19 @@ try {
                     ]);
                 }catch(Throwable){
                     $bloodCastleCenter=null;
+                }
+            }
+
+            if($type==='devilsquare' && $moduleRuntime->isEnabled('event-devilsquare-pro')){
+                try{
+                    $devilSquareCenter=$moduleRuntime->invoke('event-devilsquare-pro','ranking.header',[
+                        'rows'=>$rows,
+                        'stats'=>$eventStats,
+                        'query'=>$_GET,
+                        'path'=>$path,
+                    ]);
+                }catch(Throwable){
+                    $devilSquareCenter=null;
                 }
             }
         }elseif($type==='skyevent'){
@@ -501,7 +515,8 @@ try {
             'eventStats'=>$eventStats,
             'tvtRanking'=>$tvtRanking,
             'skyEventCenter'=>$skyEventCenter,
-            'bloodCastleCenter'=>$bloodCastleCenter
+            'bloodCastleCenter'=>$bloodCastleCenter,
+            'devilSquareCenter'=>$devilSquareCenter
         ]);
         exit;
     }
