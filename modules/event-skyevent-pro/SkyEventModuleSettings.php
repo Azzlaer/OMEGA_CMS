@@ -25,11 +25,21 @@ final class OmegaSkyEventModuleSettings
                     DesignSubtitle NVARCHAR(500) NULL,
                     BannerPath NVARCHAR(500) NULL,
                     BannerAlt NVARCHAR(180) NULL,
+                    BannerFit VARCHAR(16) NOT NULL CONSTRAINT DF_sky_banner_fit DEFAULT 'cover',
+                    BannerPosition VARCHAR(16) NOT NULL CONSTRAINT DF_sky_banner_position DEFAULT 'center',
+                    BannerHeight INT NOT NULL CONSTRAINT DF_sky_banner_height DEFAULT 420,
                     RankingLimit INT NOT NULL CONSTRAINT DF_sky_limit DEFAULT 50,
                     ShowSummary BIT NOT NULL CONSTRAINT DF_sky_summary DEFAULT 1,
                     UpdatedAt DATETIME2 NOT NULL CONSTRAINT DF_sky_updated DEFAULT SYSUTCDATETIME()
                 );
             END
+
+            IF COL_LENGTH('dbo.cms_skyevent_module_settings','BannerFit') IS NULL
+                ALTER TABLE dbo.cms_skyevent_module_settings ADD BannerFit VARCHAR(16) NOT NULL CONSTRAINT DF_sky_banner_fit_v2 DEFAULT 'cover';
+            IF COL_LENGTH('dbo.cms_skyevent_module_settings','BannerPosition') IS NULL
+                ALTER TABLE dbo.cms_skyevent_module_settings ADD BannerPosition VARCHAR(16) NOT NULL CONSTRAINT DF_sky_banner_position_v2 DEFAULT 'center';
+            IF COL_LENGTH('dbo.cms_skyevent_module_settings','BannerHeight') IS NULL
+                ALTER TABLE dbo.cms_skyevent_module_settings ADD BannerHeight INT NOT NULL CONSTRAINT DF_sky_banner_height_v2 DEFAULT 420;
         ");
 
         $this->db->execute("
@@ -56,6 +66,9 @@ final class OmegaSkyEventModuleSettings
             'design_subtitle'=>(string)($row['DesignSubtitle']??'Historial acumulado de participaciones, victorias, kills y score del evento.'),
             'banner_path'=>(string)($row['BannerPath']??''),
             'banner_alt'=>(string)($row['BannerAlt']??'Sky Event'),
+            'banner_fit'=>(string)($row['BannerFit']??'cover'),
+            'banner_position'=>(string)($row['BannerPosition']??'center'),
+            'banner_height'=>max(160,min(720,(int)($row['BannerHeight']??420))),
             'ranking_limit'=>max(10,min(100,(int)($row['RankingLimit']??50))),
             'show_summary'=>(bool)($row['ShowSummary']??1),
         ];
@@ -70,6 +83,12 @@ final class OmegaSkyEventModuleSettings
             throw new RuntimeException('Primero sube una imagen antes de activar Banner personalizado.');
         }
 
+        $fit=strtolower(trim((string)($data['banner_fit']??'cover')));
+        if(!in_array($fit,['cover','contain','fill','scale-down'],true)) $fit='cover';
+        $position=strtolower(trim((string)($data['banner_position']??'center')));
+        if(!in_array($position,['center','top','bottom','left','right'],true)) $position='center';
+        $height=max(160,min(720,(int)($data['banner_height']??420)));
+
         $this->db->execute(
             "UPDATE dbo.cms_skyevent_module_settings SET
                 HeaderMode=:mode,
@@ -77,6 +96,9 @@ final class OmegaSkyEventModuleSettings
                 DesignTitle=:title,
                 DesignSubtitle=:subtitle,
                 BannerAlt=:alt,
+                BannerFit=:fit,
+                BannerPosition=:position,
+                BannerHeight=:height,
                 RankingLimit=:ranking_limit,
                 ShowSummary=:show_summary,
                 UpdatedAt=SYSUTCDATETIME()
@@ -87,6 +109,9 @@ final class OmegaSkyEventModuleSettings
                 'title'=>$this->clip((string)($data['design_title']??''),160),
                 'subtitle'=>$this->clip((string)($data['design_subtitle']??''),500),
                 'alt'=>$this->clip((string)($data['banner_alt']??''),180),
+                'fit'=>$fit,
+                'position'=>$position,
+                'height'=>$height,
                 'ranking_limit'=>max(10,min(100,(int)($data['ranking_limit']??50))),
                 'show_summary'=>!empty($data['show_summary'])?1:0,
             ]
