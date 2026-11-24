@@ -418,6 +418,7 @@ try {
         $eventStats=null;
         $tvtRanking=null;
         $skyEventCenter=null;
+        $bloodCastleCenter=null;
 
         if($type==='tvt'){
             try{
@@ -442,6 +443,19 @@ try {
         }elseif(in_array($type,['bloodcastle','devilsquare'],true)){
             $rows=$driver->eventRanking($type,50);
             $eventStats=$driver->eventRankingSummary($type);
+
+            if($type==='bloodcastle' && $moduleRuntime->isEnabled('event-bloodcastle-pro')){
+                try{
+                    $bloodCastleCenter=$moduleRuntime->invoke('event-bloodcastle-pro','ranking.header',[
+                        'rows'=>$rows,
+                        'stats'=>$eventStats,
+                        'query'=>$_GET,
+                        'path'=>$path,
+                    ]);
+                }catch(Throwable){
+                    $bloodCastleCenter=null;
+                }
+            }
         }elseif($type==='skyevent'){
             $skyLimit=50;
 
@@ -486,7 +500,8 @@ try {
             'guildProfessional'=>$guildProfessional,
             'eventStats'=>$eventStats,
             'tvtRanking'=>$tvtRanking,
-            'skyEventCenter'=>$skyEventCenter
+            'skyEventCenter'=>$skyEventCenter,
+            'bloodCastleCenter'=>$bloodCastleCenter
         ]);
         exit;
     }
