@@ -3,16 +3,18 @@
   "slug": "event-tvt-pro",
   "version": "1.0.0",
   "author": "Omega MU CMS / LatinBattle.com",
-  "description": "Centro de estadísticas Team vs Team basado en TvTMatch, TvTResult y TvTAction.",
+  "description": "Ranking público Team vs Team integrado en Rankings, con historial, partidas y selector opcional de personajes de la cuenta.",
   "minimum_core": "0.18.0",
   "enabled_by_default": true,
   "category": "events",
-  "user_menu": {
-    "label": "Eventos · TvT",
-    "icon": "🔵🔴",
-    "order": 42
-  },
   "config_schema": [
+    {
+      "key": "show_account_characters",
+      "label": "Mostrar selector «Mis personajes»",
+      "type": "boolean",
+      "default": true,
+      "help": "Cuando el visitante inició sesión, muestra sus personajes de Character.AccountID dentro del ranking TvT para consultar sus estadísticas."
+    },
     {
       "key": "recent_matches",
       "label": "Partidas recientes",
