@@ -4,13 +4,23 @@ namespace Omega\Core;
 
 final class Security
 {
-    public static function headers(bool $googleServices=false,bool $hcaptcha=false): void
+    private static ?string $nonce=null;
+
+    public static function nonce(): string
+    {
+        if(self::$nonce===null){
+            self::$nonce=base64_encode(random_bytes(18));
+        }
+        return self::$nonce;
+    }
+
+    public static function headers(bool $googleServices=false,bool $hcaptcha=false,array $extraOrigins=[]): void
     {
         header('X-Content-Type-Options: nosniff');
         header('Referrer-Policy: strict-origin-when-cross-origin');
         header('Permissions-Policy: geolocation=(), microphone=(), camera=()');
 
-        $script="'self'";
+        $script="'self' 'nonce-".self::nonce()."'";
         $connect="'self'";
         $frame="https://www.youtube.com https://youtube.com https://www.youtube-nocookie.com https://youtube-nocookie.com";
 
@@ -26,6 +36,15 @@ final class Security
             $connect.=" https://hcaptcha.com https://*.hcaptcha.com";
             $frame.=" https://hcaptcha.com https://*.hcaptcha.com";
             $style.=" https://hcaptcha.com https://*.hcaptcha.com";
+        }
+
+        foreach($extraOrigins as $origin){
+            $origin=trim((string)$origin);
+            if(!preg_match('#^https://[A-Za-z0-9.-]+(?::[0-9]{1,5})?$#',$origin)) continue;
+            $script.=" ".$origin;
+            $connect.=" ".$origin;
+            $frame.=" ".$origin;
+            $style.=" ".$origin;
         }
 
         header("Content-Security-Policy: default-src 'self'; img-src 'self' data: https:; style-src {$style}; script-src {$script}; connect-src {$connect}; frame-src {$frame}; frame-ancestors 'none'; base-uri 'self'; form-action 'self'");
