@@ -34,7 +34,7 @@ return static function(string $hook,array $payload,array $config,array $context)
 .tvt .tvt-hero h2{position:relative;font-size:25px;line-height:1.2;margin:5px 0 7px}
 .tvt .tvt-hero p{position:relative;max-width:760px;margin:0;line-height:1.55}
 .tvt .tvt-banner{margin-bottom:16px;border:1px solid #384757;border-radius:14px;overflow:hidden;background:#090f14}
-.tvt .tvt-banner img{display:block;width:100%;height:auto;max-height:420px;object-fit:cover}
+.tvt .tvt-banner img{display:block;width:100%}
 .tvt .tvt-admin-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
 .tvt .tvt-admin-field{display:grid;gap:6px}
 .tvt .tvt-admin-field input,.tvt .tvt-admin-field select,.tvt .tvt-admin-field textarea{width:100%;padding:10px 11px;border:1px solid #344553;border-radius:8px;background:#0b141c;color:#e9f0f5}
@@ -153,6 +153,26 @@ CSS;
                 <label class="tvt-admin-field">Texto alternativo del banner
                   <input name="banner_alt" maxlength="180" value="'.$e($ui['banner_alt']).'">
                 </label>
+                <label class="tvt-admin-field">Ajuste de imagen
+                  <select name="banner_fit">
+                    <option value="cover" '.($ui['banner_fit']==='cover'?'selected':'').'>Rellenar (cover)</option>
+                    <option value="contain" '.($ui['banner_fit']==='contain'?'selected':'').'>Encajar (contain)</option>
+                    <option value="fill" '.($ui['banner_fit']==='fill'?'selected':'').'>Estirar (fill)</option>
+                    <option value="scale-down" '.($ui['banner_fit']==='scale-down'?'selected':'').'>Tamaño natural (scale-down)</option>
+                  </select>
+                </label>
+                <label class="tvt-admin-field">Posición
+                  <select name="banner_position">
+                    <option value="center" '.($ui['banner_position']==='center'?'selected':'').'>Centro</option>
+                    <option value="top" '.($ui['banner_position']==='top'?'selected':'').'>Arriba</option>
+                    <option value="bottom" '.($ui['banner_position']==='bottom'?'selected':'').'>Abajo</option>
+                    <option value="left" '.($ui['banner_position']==='left'?'selected':'').'>Izquierda</option>
+                    <option value="right" '.($ui['banner_position']==='right'?'selected':'').'>Derecha</option>
+                  </select>
+                </label>
+                <label class="tvt-admin-field">Altura del banner (px)
+                  <input type="number" name="banner_height" min="160" max="720" value="'.(int)$ui['banner_height'].'">
+                </label>
                 <label class="tvt-admin-field">Partidas recientes
                   <input type="number" name="recent_matches" min="5" max="100" value="'.(int)$ui['recent_matches'].'">
                 </label>
@@ -258,7 +278,7 @@ CSS;
 
     $headerHtml='';
     if($ui['header_mode']==='banner' && $ui['banner_path']!==''){
-        $headerHtml='<div class="tvt-banner"><img src="'.$e($ui['banner_path']).'" alt="'.$e($ui['banner_alt']).'"></div>';
+        $headerHtml='<div class="tvt-banner" style="height:'.(int)$ui['banner_height'].'px"><img src="'.$e($ui['banner_path']).'" alt="'.$e($ui['banner_alt']).'" style="height:100%;object-fit:'.$e($ui['banner_fit']).';object-position:'.$e($ui['banner_position']).'"></div>';
     }elseif($ui['header_mode']==='design'){
         $headerHtml='<div class="tvt-hero">
           <span class="eyebrow">'.$e($ui['design_eyebrow']).'</span>
