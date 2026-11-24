@@ -158,7 +158,7 @@ final class OmegaTvTModuleSettings
             }
         }
 
-        $publicPath='/uploads/event-tvt-pro/'.$name;
+        $publicPath='/public/uploads/event-tvt-pro/'.$name;
         $this->db->execute(
             "UPDATE dbo.cms_tvt_module_settings
              SET BannerPath=:p,HeaderMode='banner',UpdatedAt=SYSUTCDATETIME()
@@ -186,7 +186,7 @@ final class OmegaTvTModuleSettings
     private function deletePhysicalBanner(string $publicPath,string $except): void
     {
         if($publicPath==='' || $publicPath===$except) return;
-        if(!str_starts_with($publicPath,'/uploads/event-tvt-pro/')) return;
+        if(!str_starts_with($publicPath,'/public/uploads/event-tvt-pro/')) return;
 
         $name=basename($publicPath);
         if($name==='' || $name==='.' || $name==='..') return;
