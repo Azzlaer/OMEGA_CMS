@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+require_once __DIR__.'/DuelSystemSettings.php';
+
 /**
  * Omega MU CMS
  * Duel History Professional v1.0.1
@@ -20,6 +22,9 @@ return static function(
     array $context
 ): mixed {
     $db = $context['mu_db'];
+    $cmsDb = $context['cms_db'];
+    $root = (string)$context['root'];
+    $settingsService = new OmegaDuelSystemSettings($cmsDb,$root);
 
     $e = static fn(mixed $v): string =>
         htmlspecialchars((string)$v, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
@@ -137,12 +142,183 @@ return static function(
 .duelx .dx-empty{padding:26px;text-align:center;border:1px dashed #34495b;border-radius:10px;background:#0d151d;color:#8da2b1}
 .duelx .dx-note{border:1px solid #59482a;background:rgba(130,99,37,.10);color:#d7c594;border-radius:8px;padding:10px 12px;margin-top:12px}
 @media(max-width:980px){.duelx .dx-kpis{grid-template-columns:repeat(3,1fr)}.duelx .dx-ranking-grid{grid-template-columns:1fr 1fr}}
-@media(max-width:650px){.duelx .dx-kpis{grid-template-columns:1fr 1fr}.duelx .dx-ranking-grid{grid-template-columns:1fr}}
+.duelx .dx-banner{margin-bottom:16px;border:1px solid var(--dx-border);border-radius:14px;overflow:hidden;background:#090d12}
+.duelx .dx-banner img{display:block;width:100%}
+.duelx .dx-admin-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.duelx .dx-field{display:grid;gap:6px}
+.duelx .dx-field input,.duelx .dx-field select,.duelx .dx-field textarea{width:100%;padding:10px 11px;border:1px solid #34485b;border-radius:8px;background:#081019;color:#e9eef2}
+.duelx .dx-field textarea{min-height:88px;resize:vertical}
+.duelx .dx-choice{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.duelx .dx-choice label{display:flex;gap:8px;align-items:center;border:1px solid #34485b;border-radius:9px;padding:10px;background:#0a1219}
+.duelx .dx-preview{max-width:100%;border-radius:10px;border:1px solid #34485b;display:block}
+.duelx .dx-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+@media(max-width:650px){.duelx .dx-kpis{grid-template-columns:1fr 1fr}.duelx .dx-ranking-grid{grid-template-columns:1fr}.duelx .dx-admin-grid{grid-template-columns:1fr}.duelx .dx-choice{grid-template-columns:1fr}}
 </style>
 CSS;
     };
 
+    if($hook === 'admin.action'){
+        $action=(string)($payload['action']??'');
+        $data=(array)($payload['data']??[]);
+        $files=(array)($payload['files']??[]);
+
+        if($action==='save_settings'){
+            $settingsService->save($data);
+            return 'Configuración de Duelos guardada correctamente.';
+        }
+        if($action==='upload_banner'){
+            $settingsService->uploadBanner((array)($files['banner_image']??[]));
+            return 'Banner de Duelos subido y activado correctamente.';
+        }
+        if($action==='delete_banner'){
+            $settingsService->deleteBanner();
+            return 'Banner de Duelos eliminado. Se restauró el diseño.';
+        }
+
+        throw new RuntimeException('Acción de Duelos no reconocida.');
+    }
+
+    if($hook === 'ranking.settings'){
+        return $settingsService->get();
+    }
+
+    if($hook === 'ranking.header'){
+        $ui=$settingsService->get();
+        $rows=(array)($payload['rows']??[]);
+
+        $header='';
+        if($ui['header_mode']==='banner' && $ui['banner_path']!==''){
+            $header='<div class="dx-banner" style="height:'.(int)$ui['banner_height'].'px"><img src="'.$e($ui['banner_path']).'" alt="'.$e($ui['banner_alt']).'" style="height:100%;object-fit:'.$e($ui['banner_fit']).';object-position:'.$e($ui['banner_position']).'"></div>';
+        }elseif($ui['header_mode']==='design'){
+            $header='<div class="dx-hero">
+                <span class="dx-eyebrow">'.$e($ui['design_eyebrow']).'</span>
+                <h2>'.$e($ui['design_title']).'</h2>
+                <p class="dx-muted">'.$e($ui['design_subtitle']).'</p>
+            </div>';
+        }
+
+        $summary='';
+        if($ui['show_summary']){
+            $players=count($rows);
+            $duels=0;$wins=0;$losses=0;$bestRating=0;$bestStreak=0;
+            foreach($rows as $row){
+                $duels+=(int)($row['Duels']??0);
+                $wins+=(int)($row['Wins']??0);
+                $losses+=(int)($row['Losses']??0);
+                $bestRating=max($bestRating,(int)($row['Rating']??0));
+                $bestStreak=max($bestStreak,(int)($row['BestStreak']??0));
+            }
+
+            $summary='<div class="dx-kpis">
+                <div class="dx-kpi"><span>Jugadores</span><strong>'.number_format($players,0,',','.').'</strong></div>
+                <div class="dx-kpi"><span>Duelos</span><strong>'.number_format($duels,0,',','.').'</strong></div>
+                <div class="dx-kpi"><span>Victorias</span><strong class="win">'.number_format($wins,0,',','.').'</strong></div>
+                <div class="dx-kpi"><span>Mejor rating</span><strong class="ratio">'.number_format($bestRating,0,',','.').'</strong></div>'.
+                ($ui['show_top_streak']?'<div class="dx-kpi"><span>Mejor racha</span><strong>'.number_format($bestStreak,0,',','.').'</strong></div>':'').
+            '</div>';
+        }
+
+        return $renderStyles().'<div class="duelx">'.$header.$summary.'</div>';
+    }
+
     if($hook === 'admin.panel'){
+        $ui=$settingsService->get();
+        $token=$e((string)($payload['csrf_token']??''));
+
+        $bannerPreview=$ui['banner_path']!==''
+            ? '<img class="dx-preview" src="'.$e($ui['banner_path']).'" alt="'.$e($ui['banner_alt']).'">'
+            : '<div class="dx-empty">No hay banner personalizado cargado.</div>';
+
+        $adminConfig='<div class="duelx">
+          <div class="dx-section">
+            <span class="dx-eyebrow">APARIENCIA · PVP CENTER</span>
+            <h3>Duelos PRO</h3>
+            <p class="dx-muted">Configura el center de Rankings → Sistemas → Duelos.</p>
+
+            <form method="post" action="/admin/modules/action">
+              <input type="hidden" name="_csrf" value="'.$token.'">
+              <input type="hidden" name="slug" value="duel-history-professional">
+              <input type="hidden" name="module_action" value="save_settings">
+
+              <div class="dx-choice">
+                <label><input type="radio" name="header_mode" value="design" '.($ui['header_mode']==='design'?'checked':'').'> Diseño Duelos</label>
+                <label><input type="radio" name="header_mode" value="banner" '.($ui['header_mode']==='banner'?'checked':'').'> Banner personalizado</label>
+                <label><input type="radio" name="header_mode" value="none" '.($ui['header_mode']==='none'?'checked':'').'> Sin cabecera</label>
+              </div>
+
+              <div class="dx-admin-grid" style="margin-top:14px">
+                <label class="dx-field">Eyebrow
+                  <input name="design_eyebrow" maxlength="120" value="'.$e($ui['design_eyebrow']).'">
+                </label>
+                <label class="dx-field">Título
+                  <input name="design_title" maxlength="180" value="'.$e($ui['design_title']).'">
+                </label>
+                <label class="dx-field" style="grid-column:1/-1">Descripción
+                  <textarea name="design_subtitle" maxlength="500">'.$e($ui['design_subtitle']).'</textarea>
+                </label>
+                <label class="dx-field">Texto alternativo
+                  <input name="banner_alt" maxlength="180" value="'.$e($ui['banner_alt']).'">
+                </label>
+                <label class="dx-field">Ajuste de imagen
+                  <select name="banner_fit">
+                    <option value="cover" '.($ui['banner_fit']==='cover'?'selected':'').'>Rellenar (cover)</option>
+                    <option value="contain" '.($ui['banner_fit']==='contain'?'selected':'').'>Encajar (contain)</option>
+                    <option value="fill" '.($ui['banner_fit']==='fill'?'selected':'').'>Estirar (fill)</option>
+                    <option value="scale-down" '.($ui['banner_fit']==='scale-down'?'selected':'').'>Tamaño natural (scale-down)</option>
+                  </select>
+                </label>
+                <label class="dx-field">Posición
+                  <select name="banner_position">
+                    <option value="center" '.($ui['banner_position']==='center'?'selected':'').'>Centro</option>
+                    <option value="top" '.($ui['banner_position']==='top'?'selected':'').'>Arriba</option>
+                    <option value="bottom" '.($ui['banner_position']==='bottom'?'selected':'').'>Abajo</option>
+                    <option value="left" '.($ui['banner_position']==='left'?'selected':'').'>Izquierda</option>
+                    <option value="right" '.($ui['banner_position']==='right'?'selected':'').'>Derecha</option>
+                  </select>
+                </label>
+                <label class="dx-field">Altura del banner (px)
+                  <input type="number" name="banner_height" min="160" max="720" value="'.(int)$ui['banner_height'].'">
+                </label>
+                <label class="dx-field">Jugadores en ranking
+                  <input type="number" name="ranking_limit" min="10" max="100" value="'.(int)$ui['ranking_limit'].'">
+                </label>
+              </div>
+
+              <div class="dx-choice" style="margin-top:14px">
+                <label><input type="checkbox" name="show_summary" value="1" '.($ui['show_summary']?'checked':'').'> Mostrar resumen PvP</label>
+                <label><input type="checkbox" name="show_top_streak" value="1" '.($ui['show_top_streak']?'checked':'').'> Mostrar mejor racha</label>
+              </div>
+
+              <div class="dx-actions">
+                <button class="dx-btn" type="submit">Guardar configuración</button>
+                <a class="dx-btn" href="/rankings?type=duel" target="_blank" rel="noopener">Vista previa</a>
+              </div>
+            </form>
+          </div>
+
+          <div class="dx-section">
+            <span class="dx-eyebrow">BANNER PERSONALIZADO</span>
+            <h3>Imagen del Sistema de Duelos</h3>
+            <p class="dx-muted">JPG, PNG o WEBP · máximo 8 MB · recomendado 1600×420.</p>
+            '.$bannerPreview.'
+            <div class="dx-actions">
+              <form method="post" action="/admin/modules/action" enctype="multipart/form-data">
+                <input type="hidden" name="_csrf" value="'.$token.'">
+                <input type="hidden" name="slug" value="duel-history-professional">
+                <input type="hidden" name="module_action" value="upload_banner">
+                <input type="file" name="banner_image" accept="image/jpeg,image/png,image/webp" required>
+                <button class="dx-btn" type="submit">Subir y usar banner</button>
+              </form>'.
+              ($ui['banner_path']!==''?'<form method="post" action="/admin/modules/action" onsubmit="return confirm(\'¿Eliminar el banner de Duelos?\')">
+                <input type="hidden" name="_csrf" value="'.$token.'">
+                <input type="hidden" name="slug" value="duel-history-professional">
+                <input type="hidden" name="module_action" value="delete_banner">
+                <button class="dx-btn" type="submit">Eliminar banner</button>
+              </form>':'').'
+            </div>
+          </div>
+        </div>';
+
         $historyOk=$tableExists('DuelHistory');
         $rankingOk=$tableExists('DuelRanking');
         $hcols=$historyOk ? $columnMap('DuelHistory') : [];
@@ -174,7 +350,7 @@ CSS;
                 ($ok?'#70d79e':'#ff9b83').'">'.($ok?'✓ Detectada':'✕ Falta').'</td></tr>';
         }
 
-        return $renderStyles().'
+        return $renderStyles().$adminConfig.'
         <div class="duelx">
           <div class="dx-hero">
             <span class="dx-eyebrow">MODULE DIAGNOSTICS</span>
