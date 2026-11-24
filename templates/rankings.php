@@ -11,6 +11,7 @@ $eventStats=$eventStats??null;
 $tvtRanking=$tvtRanking??null;
 $skyEventCenter=$skyEventCenter??null;
 $bloodCastleCenter=$bloodCastleCenter??null;
+$devilSquareCenter=$devilSquareCenter??null;
 
 $tabs=[
  'level'=>['Nivel','Personajes'],
@@ -323,8 +324,15 @@ $guildMarkHtml=static function(mixed $mark,string $name='Guild') use($e): string
     <?= $bloodCastleCenter ?>
 <?php endif; ?>
 
+<?php if($type==='devilsquare' && is_string($devilSquareCenter) && $devilSquareCenter!==''): ?>
+    <?= $devilSquareCenter ?>
+<?php endif; ?>
+
 <?php if(
-    ($type==='devilsquare' || ($type==='bloodcastle' && (!is_string($bloodCastleCenter) || $bloodCastleCenter==='')))
+    (
+        ($type==='bloodcastle' && (!is_string($bloodCastleCenter) || $bloodCastleCenter===''))
+        || ($type==='devilsquare' && (!is_string($devilSquareCenter) || $devilSquareCenter===''))
+    )
     && is_array($eventStats)
 ): ?>
 <div class="event-ranking-summary">
