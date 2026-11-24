@@ -1,0 +1,11 @@
+{
+  "name": "Evento Blood Castle PRO",
+  "slug": "event-bloodcastle-pro",
+  "version": "1.0.0",
+  "author": "Omega MU CMS / LatinBattle.com",
+  "description": "Extensión visual y administrativa de Blood Castle para Rankings → Eventos, con banner y ajuste de imagen configurables desde AdminCP.",
+  "minimum_core": "0.18.0",
+  "enabled_by_default": true,
+  "category": "events",
+  "config_schema": []
+}
