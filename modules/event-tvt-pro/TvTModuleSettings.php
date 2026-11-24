@@ -25,6 +25,9 @@ final class OmegaTvTModuleSettings
                     DesignSubtitle NVARCHAR(500) NULL,
                     BannerPath NVARCHAR(500) NULL,
                     BannerAlt NVARCHAR(180) NULL,
+                    BannerFit VARCHAR(16) NOT NULL CONSTRAINT DF_tvt_banner_fit DEFAULT 'cover',
+                    BannerPosition VARCHAR(16) NOT NULL CONSTRAINT DF_tvt_banner_position DEFAULT 'center',
+                    BannerHeight INT NOT NULL CONSTRAINT DF_tvt_banner_height DEFAULT 420,
                     ShowAccountCharacters BIT NOT NULL CONSTRAINT DF_tvt_show_chars DEFAULT 1,
                     RecentMatches INT NOT NULL CONSTRAINT DF_tvt_recent DEFAULT 20,
                     RankingLimit INT NOT NULL CONSTRAINT DF_tvt_ranking DEFAULT 30,
@@ -34,6 +37,13 @@ final class OmegaTvTModuleSettings
                     UpdatedAt DATETIME2 NOT NULL CONSTRAINT DF_tvt_updated DEFAULT SYSUTCDATETIME()
                 );
             END
+
+            IF COL_LENGTH('dbo.cms_tvt_module_settings','BannerFit') IS NULL
+                ALTER TABLE dbo.cms_tvt_module_settings ADD BannerFit VARCHAR(16) NOT NULL CONSTRAINT DF_tvt_banner_fit_v12 DEFAULT 'cover';
+            IF COL_LENGTH('dbo.cms_tvt_module_settings','BannerPosition') IS NULL
+                ALTER TABLE dbo.cms_tvt_module_settings ADD BannerPosition VARCHAR(16) NOT NULL CONSTRAINT DF_tvt_banner_position_v12 DEFAULT 'center';
+            IF COL_LENGTH('dbo.cms_tvt_module_settings','BannerHeight') IS NULL
+                ALTER TABLE dbo.cms_tvt_module_settings ADD BannerHeight INT NOT NULL CONSTRAINT DF_tvt_banner_height_v12 DEFAULT 420;
         ");
 
         $this->db->execute("
@@ -60,6 +70,9 @@ final class OmegaTvTModuleSettings
             'design_subtitle'=>(string)($row['DesignSubtitle']??'Historial, ranking y estadísticas reales del evento registrados por el GameServer.'),
             'banner_path'=>(string)($row['BannerPath']??''),
             'banner_alt'=>(string)($row['BannerAlt']??'Evento TvT'),
+            'banner_fit'=>(string)($row['BannerFit']??'cover'),
+            'banner_position'=>(string)($row['BannerPosition']??'center'),
+            'banner_height'=>max(160,min(720,(int)($row['BannerHeight']??420))),
             'show_account_characters'=>(bool)($row['ShowAccountCharacters']??1),
             'recent_matches'=>(int)($row['RecentMatches']??20),
             'ranking_limit'=>(int)($row['RankingLimit']??30),
@@ -81,6 +94,11 @@ final class OmegaTvTModuleSettings
         $title=$this->clip((string)($data['design_title']??''),160);
         $subtitle=$this->clip((string)($data['design_subtitle']??''),500);
         $alt=$this->clip((string)($data['banner_alt']??''),180);
+        $fit=strtolower(trim((string)($data['banner_fit']??'cover')));
+        if(!in_array($fit,['cover','contain','fill','scale-down'],true)) $fit='cover';
+        $position=strtolower(trim((string)($data['banner_position']??'center')));
+        if(!in_array($position,['center','top','bottom','left','right'],true)) $position='center';
+        $height=max(160,min(720,(int)($data['banner_height']??420)));
 
         $recent=max(5,min(100,(int)($data['recent_matches']??20)));
         $ranking=max(10,min(100,(int)($data['ranking_limit']??30)));
@@ -93,6 +111,9 @@ final class OmegaTvTModuleSettings
                 DesignTitle=:title,
                 DesignSubtitle=:subtitle,
                 BannerAlt=:alt,
+                BannerFit=:fit,
+                BannerPosition=:position,
+                BannerHeight=:height,
                 ShowAccountCharacters=:chars,
                 RecentMatches=:recent,
                 RankingLimit=:ranking,
@@ -107,6 +128,9 @@ final class OmegaTvTModuleSettings
                 'title'=>$title,
                 'subtitle'=>$subtitle,
                 'alt'=>$alt,
+                'fit'=>$fit,
+                'position'=>$position,
+                'height'=>$height,
                 'chars'=>!empty($data['show_account_characters'])?1:0,
                 'recent'=>$recent,
                 'ranking'=>$ranking,

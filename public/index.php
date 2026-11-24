@@ -417,6 +417,8 @@ try {
         $guildProfessional=null;
         $eventStats=null;
         $tvtRanking=null;
+        $skyEventCenter=null;
+        $bloodCastleCenter=null;
 
         if($type==='tvt'){
             try{
@@ -441,7 +443,45 @@ try {
         }elseif(in_array($type,['bloodcastle','devilsquare'],true)){
             $rows=$driver->eventRanking($type,50);
             $eventStats=$driver->eventRankingSummary($type);
-        }elseif(in_array($type,['duel','skyevent','monsterpoints','minigames','goldenarcher'],true)){
+
+            if($type==='bloodcastle' && $moduleRuntime->isEnabled('event-bloodcastle-pro')){
+                try{
+                    $bloodCastleCenter=$moduleRuntime->invoke('event-bloodcastle-pro','ranking.header',[
+                        'rows'=>$rows,
+                        'stats'=>$eventStats,
+                        'query'=>$_GET,
+                        'path'=>$path,
+                    ]);
+                }catch(Throwable){
+                    $bloodCastleCenter=null;
+                }
+            }
+        }elseif($type==='skyevent'){
+            $skyLimit=50;
+
+            if($moduleRuntime->isEnabled('event-skyevent-pro')){
+                try{
+                    $skySettings=$moduleRuntime->invoke('event-skyevent-pro','ranking.settings',[]);
+                    if(is_array($skySettings)){
+                        $skyLimit=max(10,min(100,(int)($skySettings['ranking_limit']??50)));
+                    }
+                }catch(Throwable){}
+            }
+
+            $rows=$driver->advancedRanking('skyevent',$skyLimit);
+
+            if($moduleRuntime->isEnabled('event-skyevent-pro')){
+                try{
+                    $skyEventCenter=$moduleRuntime->invoke('event-skyevent-pro','ranking.header',[
+                        'rows'=>$rows,
+                        'query'=>$_GET,
+                        'path'=>$path,
+                    ]);
+                }catch(Throwable){
+                    $skyEventCenter=null;
+                }
+            }
+        }elseif(in_array($type,['duel','monsterpoints','minigames','goldenarcher'],true)){
             $rows=$driver->advancedRanking($type,50);
         }elseif(($classId=\Omega\GameServer\Drivers\MuEmu097kKayito\CharacterClass::classFromSlug($type))!==null){
             $rows=$driver->classRanking($classId,50);
@@ -459,7 +499,9 @@ try {
             'nameRenderer'=>$nameRenderer,
             'guildProfessional'=>$guildProfessional,
             'eventStats'=>$eventStats,
-            'tvtRanking'=>$tvtRanking
+            'tvtRanking'=>$tvtRanking,
+            'skyEventCenter'=>$skyEventCenter,
+            'bloodCastleCenter'=>$bloodCastleCenter
         ]);
         exit;
     }

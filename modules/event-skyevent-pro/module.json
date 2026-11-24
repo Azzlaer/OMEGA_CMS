@@ -1,0 +1,11 @@
+{
+  "name": "Evento SkyEvent PRO",
+  "slug": "event-skyevent-pro",
+  "version": "1.1.0",
+  "author": "Omega MU CMS / LatinBattle.com",
+  "description": "Extensión visual y administrativa de Sky Event para Rankings → Eventos, con banner configurable desde AdminCP.",
+  "minimum_core": "0.18.0",
+  "enabled_by_default": true,
+  "category": "events",
+  "config_schema": []
+}

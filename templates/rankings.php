@@ -9,6 +9,8 @@ $visualAssets=$visualAssets ?? []; $nameRenderer=$nameRenderer??null;
 $guildProfessional=$guildProfessional??null;
 $eventStats=$eventStats??null;
 $tvtRanking=$tvtRanking??null;
+$skyEventCenter=$skyEventCenter??null;
+$bloodCastleCenter=$bloodCastleCenter??null;
 
 $tabs=[
  'level'=>['Nivel','Personajes'],
@@ -19,7 +21,7 @@ $tabs=[
  'devilsquare'=>['Devil Square','Eventos'],
  'tvt'=>['TvT','Eventos'],
  'duel'=>['Duelos','Sistemas'],
- 'skyevent'=>['Sky Event','Sistemas'],
+ 'skyevent'=>['Sky Event','Eventos'],
  'monsterpoints'=>['Monster Points','Sistemas'],
  'minigames'=>['MiniGames','Sistemas'],
  'goldenarcher'=>['Golden Archer','Sistemas'],
@@ -313,7 +315,18 @@ $guildMarkHtml=static function(mixed $mark,string $name='Guild') use($e): string
 <?php endif; ?>
 
 <?php else: ?>
-<?php if(in_array($type,['bloodcastle','devilsquare'],true) && is_array($eventStats)): ?>
+<?php if($type==='skyevent' && is_string($skyEventCenter) && $skyEventCenter!==''): ?>
+    <?= $skyEventCenter ?>
+<?php endif; ?>
+
+<?php if($type==='bloodcastle' && is_string($bloodCastleCenter) && $bloodCastleCenter!==''): ?>
+    <?= $bloodCastleCenter ?>
+<?php endif; ?>
+
+<?php if(
+    ($type==='devilsquare' || ($type==='bloodcastle' && (!is_string($bloodCastleCenter) || $bloodCastleCenter==='')))
+    && is_array($eventStats)
+): ?>
 <div class="event-ranking-summary">
     <div class="event-stat-card"><span>Participantes</span><strong><?= number_format((int)($eventStats['participants']??0)) ?></strong><small>registrados</small></div>
     <div class="event-stat-card"><span>Mejor score</span><strong><?= number_format((int)($eventStats['bestScore']??0)) ?></strong><small>récord actual</small></div>
