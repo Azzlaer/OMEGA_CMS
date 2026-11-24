@@ -1,9 +1,9 @@
 {
-  "name": "Secure Roulette",
+  "name": "Secure Roulette PRO",
   "slug": "secure-roulette",
-  "version": "1.0.2",
+  "version": "2.1.0",
   "author": "Omega MU CMS",
-  "description": "Ruleta de premios segura para Omega Web. Incluye fix SQL Server/ODBC para parámetros DATEADD.",
+  "description": "Ruleta de premios server-side para OMEGA CMS con probabilidades configurables, costo por giro, límites diarios, campañas, auditoría y estadísticas.",
   "minimum_core": "0.18.0",
   "enabled_by_default": true,
   "user_menu": {
@@ -36,6 +36,58 @@
       "max": 100
     },
     {
+      "key": "daily_spin_limit",
+      "label": "Máximo de giros diarios",
+      "type": "integer",
+      "default": 1,
+      "min": 0,
+      "max": 1000,
+      "help": "0 = sin límite diario. El cooldown sigue aplicándose de forma independiente."
+    },
+    {
+      "key": "require_offline",
+      "label": "Exigir cuenta desconectada",
+      "type": "boolean",
+      "default": false,
+      "help": "Bloquea el giro si la cuenta está conectada al servidor."
+    },
+    {
+      "key": "campaign_start",
+      "label": "Inicio de campaña (opcional)",
+      "type": "string",
+      "default": "",
+      "help": "Formato YYYY-MM-DD HH:MM:SS. Vacío = sin fecha inicial."
+    },
+    {
+      "key": "campaign_end",
+      "label": "Fin de campaña (opcional)",
+      "type": "string",
+      "default": "",
+      "help": "Formato YYYY-MM-DD HH:MM:SS. Vacío = sin fecha final."
+    },
+    {
+      "key": "spin_cost_type",
+      "label": "Moneda del costo por giro",
+      "type": "select",
+      "default": "None",
+      "options": {
+        "None": "Gratis",
+        "WCoinC": "WCoinC",
+        "WCoinP": "WCoinP",
+        "GoblinPoint": "GoblinPoint",
+        "Credits": "Credits"
+      }
+    },
+    {
+      "key": "spin_cost_amount",
+      "label": "Costo por giro",
+      "type": "integer",
+      "default": 0,
+      "min": 0,
+      "max": 1000000,
+      "help": "Se descuenta dentro de la misma transacción que determina y acredita el premio."
+    },
+    {
       "key": "slot1_type",
       "label": "Premio 1 - Tipo",
       "type": "select",
@@ -54,6 +106,15 @@
       "default": 10,
       "min": 0,
       "max": 1000000
+    },
+    {
+      "key": "slot1_weight",
+      "label": "Premio 1 - Peso / probabilidad",
+      "type": "integer",
+      "default": 100,
+      "min": 0,
+      "max": 1000000,
+      "help": "Peso relativo. 0 desactiva esta casilla. La probabilidad real se calcula contra la suma de todos los pesos."
     },
     {
       "key": "slot2_type",
@@ -76,6 +137,15 @@
       "max": 1000000
     },
     {
+      "key": "slot2_weight",
+      "label": "Premio 2 - Peso / probabilidad",
+      "type": "integer",
+      "default": 100,
+      "min": 0,
+      "max": 1000000,
+      "help": "Peso relativo. 0 desactiva esta casilla. La probabilidad real se calcula contra la suma de todos los pesos."
+    },
+    {
       "key": "slot3_type",
       "label": "Premio 3 - Tipo",
       "type": "select",
@@ -94,6 +164,15 @@
       "default": 10,
       "min": 0,
       "max": 1000000
+    },
+    {
+      "key": "slot3_weight",
+      "label": "Premio 3 - Peso / probabilidad",
+      "type": "integer",
+      "default": 100,
+      "min": 0,
+      "max": 1000000,
+      "help": "Peso relativo. 0 desactiva esta casilla. La probabilidad real se calcula contra la suma de todos los pesos."
     },
     {
       "key": "slot4_type",
@@ -116,6 +195,15 @@
       "max": 1000000
     },
     {
+      "key": "slot4_weight",
+      "label": "Premio 4 - Peso / probabilidad",
+      "type": "integer",
+      "default": 100,
+      "min": 0,
+      "max": 1000000,
+      "help": "Peso relativo. 0 desactiva esta casilla. La probabilidad real se calcula contra la suma de todos los pesos."
+    },
+    {
       "key": "slot5_type",
       "label": "Premio 5 - Tipo",
       "type": "select",
@@ -134,6 +222,15 @@
       "default": 25,
       "min": 0,
       "max": 1000000
+    },
+    {
+      "key": "slot5_weight",
+      "label": "Premio 5 - Peso / probabilidad",
+      "type": "integer",
+      "default": 100,
+      "min": 0,
+      "max": 1000000,
+      "help": "Peso relativo. 0 desactiva esta casilla. La probabilidad real se calcula contra la suma de todos los pesos."
     },
     {
       "key": "slot6_type",
@@ -156,6 +253,15 @@
       "max": 1000000
     },
     {
+      "key": "slot6_weight",
+      "label": "Premio 6 - Peso / probabilidad",
+      "type": "integer",
+      "default": 100,
+      "min": 0,
+      "max": 1000000,
+      "help": "Peso relativo. 0 desactiva esta casilla. La probabilidad real se calcula contra la suma de todos los pesos."
+    },
+    {
       "key": "slot7_type",
       "label": "Premio 7 - Tipo",
       "type": "select",
@@ -176,6 +282,15 @@
       "max": 1000000
     },
     {
+      "key": "slot7_weight",
+      "label": "Premio 7 - Peso / probabilidad",
+      "type": "integer",
+      "default": 100,
+      "min": 0,
+      "max": 1000000,
+      "help": "Peso relativo. 0 desactiva esta casilla. La probabilidad real se calcula contra la suma de todos los pesos."
+    },
+    {
       "key": "slot8_type",
       "label": "Premio 8 - Tipo",
       "type": "select",
@@ -194,6 +309,15 @@
       "default": 25,
       "min": 0,
       "max": 1000000
+    },
+    {
+      "key": "slot8_weight",
+      "label": "Premio 8 - Peso / probabilidad",
+      "type": "integer",
+      "default": 100,
+      "min": 0,
+      "max": 1000000,
+      "help": "Peso relativo. 0 desactiva esta casilla. La probabilidad real se calcula contra la suma de todos los pesos."
     }
   ]
 }

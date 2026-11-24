@@ -1,182 +1,142 @@
-# Secure Roulette v1.0.2 — Omega Web
+# Secure Roulette PRO v2
 
-Módulo instalable para Omega MU CMS.
+Evolución del módulo `secure-roulette` de OMEGA CMS, tomando como referencia funcional y de seguridad el plugin **MUCore Ruleta Secure v1.1.0** suministrado para análisis.
 
-## Instalación
+## Qué se conserva del enfoque seguro de MUCore
 
-1. AdminCP → Módulos.
-2. Instalar módulo.
-3. Seleccionar `Omega-Module-Secure-Roulette-v1.0.2.zip`.
-4. Activar.
-5. Configurar premios y cooldown.
-6. Aparecerá `🎰 Ruleta Segura` en Mi Cuenta.
+El plugin de referencia corrigió correctamente varios problemas de una versión anterior:
 
-No debes reemplazar archivos del core.
+- el navegador no decide el premio;
+- el navegador no envía AccountID con autoridad;
+- el servidor usa la cuenta autenticada;
+- el premio se decide con `random_int()`;
+- cooldown validado en servidor;
+- CSRF;
+- protección contra doble submit / concurrencia;
+- la animación es solamente visual.
 
-## Seguridad
+OMEGA mantiene esos principios, pero reemplaza el estado en archivos JSON/`flock()` por bloqueo transaccional SQL Server con `UPDLOCK,HOLDLOCK`.
 
-El navegador NO envía:
+## Mejoras de OMEGA v2
 
-- AccountID
-- userid
-- tipo de premio
-- cantidad de premio
-- slot ganador
+### Probabilidades ponderadas
 
-El módulo recibe el `account_id` exclusivamente desde la sesión autenticada
-que Omega pasa a `user.page`.
+Cada uno de los 8 slots tiene:
 
-El premio se decide con:
+- tipo de premio;
+- cantidad;
+- peso.
 
-```php
-random_int(1, 8)
-```
+La probabilidad real es:
 
-en el servidor.
+`peso_del_slot / suma_de_todos_los_pesos`
 
-## CSRF
+Peso 0 desactiva una casilla.
 
-Omega ya valida `_csrf` antes de ejecutar un POST de:
+La selección se realiza exclusivamente en PHP con `random_int(1, totalWeight)`.
 
-`/account/modules/{slug}`
+### Economía de giro
 
-El módulo usa el token entregado por el core.
-
-## Concurrencia
-
-Se utiliza una transacción SQL y:
-
-```sql
-WITH (UPDLOCK,HOLDLOCK)
-```
-
-sobre `cms_secure_roulette_state`.
-
-La operación crítica incluye:
-
-1. bloquear estado;
-2. comprobar cooldown;
-3. elegir premio;
-4. acreditar saldo;
-5. actualizar cooldown;
-6. registrar historial;
-7. commit.
-
-## Tablas creadas automáticamente
-
-### cms_secure_roulette_state
-
-- account_id
-- last_spin_at
-- spin_count
-- updated_at
-
-### cms_secure_roulette_log
-
-- id
-- account_id
-- slot_no
-- reward_type
-- reward_amount
-- created_at
-
-## Backends soportados
-
-### CashShopData
-
-- AccountID
-- WCoinC
-- WCoinP
-- GoblinPoint
-
-### memb_credits
-
-- memb___id
-- credits
-
-El panel administrativo diagnostica si esos campos existen.
-
-## Premios
-
-8 posiciones configurables.
-
-Tipos:
+El administrador puede configurar un costo opcional por giro usando:
 
 - WCoinC
 - WCoinP
 - GoblinPoint
 - Credits
 
-Cantidad máxima admitida por el módulo:
+Costo y premio forman parte de la misma transacción.
 
-`1.000.000`
+Si el usuario no tiene saldo suficiente, el giro no ocurre.
 
-## Importantísimo
+### Límites
 
-Modificar con Chrome DevTools:
+- cooldown configurable;
+- anti doble-submit técnico cuando cooldown=0;
+- máximo de giros diarios;
+- cuenta offline opcional;
+- campaña con fecha de inicio y fin.
 
-- HTML
-- CSS
-- JavaScript
-- rueda
-- ángulo
-- texto
-- formulario visual
+### Auditoría
 
-NO permite cambiar el premio real.
+`cms_secure_roulette_log` registra:
 
-El premio se selecciona y acredita en SQL antes de que el navegador muestre
-la animación ganadora.
+- cuenta;
+- slot;
+- tipo de premio;
+- cantidad;
+- peso configurado al momento del giro;
+- moneda y costo del giro;
+- hash SHA-256 de IP;
+- fecha UTC.
 
+La IP nunca se almacena en texto plano.
 
-## v1.0.2 — PHP 8.2 Compatibility Fix
+### Compatibilidad
 
-Se eliminó:
+Backends de premios/costo:
 
-```php
-use RuntimeException;
-```
+- `CashShopData.WCoinC`
+- `CashShopData.WCoinP`
+- `CashShopData.GoblinPoint`
+- `memb_credits.credits`
 
-porque `Module.php` se ejecuta en el namespace global y PHP 8.2 mostraba:
+El panel diagnostica si cada backend existe.
 
-```text
-The use statement with non-compound name 'RuntimeException' has no effect
-```
+### UI y CSP
 
-Ahora las excepciones se referencian explícitamente como:
+La rueda sigue siendo únicamente una representación visual.
 
-```php
-\RuntimeException
-```
+La animación JavaScript se movió a:
 
-No cambia la lógica ni la seguridad del módulo.
+`assets/roulette-pro.js`
 
+para respetar CSP estricto y evitar scripts inline.
 
-## v1.0.2 — SQL Server DATEADD / ODBC Fix
+## Migración desde 1.0.2
 
-Se corrigió:
+La migración es automática.
 
-```text
-SQLSTATE[42000]:
-Argument data type nvarchar is invalid for argument 2 of dateadd function.
-```
+Si `cms_secure_roulette_log` ya existe, OMEGA agrega cuando faltan:
 
-Con PDO_SQLSRV/ODBC Driver 18, los parámetros nombrados pueden llegar a SQL Server
-como `nvarchar`.
+- `reward_weight`
+- `cost_type`
+- `cost_amount`
+- `client_ip_hash`
 
-Antes:
+No elimina el historial anterior.
 
-```sql
-DATEADD(MINUTE,:cooldown,last_spin_at)
-DATEADD(SECOND,:cooldown,CAST(:last_spin AS DATETIME2))
-```
+## Configuración recomendada inicial
 
-Ahora:
+Para una ruleta gratuita diaria:
 
-```sql
-DATEADD(MINUTE,CAST(:cooldown AS INT),last_spin_at)
-DATEADD(SECOND,CAST(:cooldown AS INT),CAST(:last_spin AS DATETIME2))
-```
+- `enabled = true`
+- `cooldown_minutes = 1440`
+- `daily_spin_limit = 1`
+- `spin_cost_type = None`
+- `spin_cost_amount = 0`
 
-La corrección se aplicó tanto al cálculo visual del cooldown como a la validación
-interna dentro de la transacción del giro.
+Para probabilidades iguales:
+
+- `slot1_weight ... slot8_weight = 100`
+
+Para un premio raro:
+
+- premios comunes = 100
+- premio raro = 5
+
+Los pesos son relativos, no porcentajes directos.
+
+## Seguridad heredada y reforzada
+
+El navegador nunca envía con autoridad:
+
+- AccountID;
+- premio;
+- cantidad;
+- peso;
+- costo;
+- slot ganador.
+
+OMEGA valida CSRF en el core y el giro usa una transacción SQL con `UPDLOCK,HOLDLOCK`.
+
+La entrega real ocurre antes de la animación.

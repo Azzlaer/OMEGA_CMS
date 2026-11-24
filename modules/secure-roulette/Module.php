@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 /**
  * Omega MU CMS
- * Secure Roulette v1.0.2
+ * Secure Roulette PRO v2.1.0
  *
  * Principios:
  * - el navegador NO decide AccountID;
@@ -85,11 +85,29 @@ return static function(
                     slot_no TINYINT NOT NULL,
                     reward_type VARCHAR(32) NOT NULL,
                     reward_amount INT NOT NULL,
+                    reward_weight INT NULL,
+                    cost_type VARCHAR(32) NULL,
+                    cost_amount INT NOT NULL CONSTRAINT DF_rulette_cost DEFAULT 0,
+                    client_ip_hash CHAR(64) NULL,
                     created_at DATETIME2 NOT NULL CONSTRAINT DF_rulette_log_created DEFAULT SYSUTCDATETIME()
                 );
 
                 CREATE INDEX IX_cms_secure_roulette_log_account
                     ON dbo.cms_secure_roulette_log(account_id,created_at DESC);
+            END
+        ");
+
+        $db->execute("
+            IF OBJECT_ID('dbo.cms_secure_roulette_log','U') IS NOT NULL
+            BEGIN
+                IF COL_LENGTH('dbo.cms_secure_roulette_log','reward_weight') IS NULL
+                    ALTER TABLE dbo.cms_secure_roulette_log ADD reward_weight INT NULL;
+                IF COL_LENGTH('dbo.cms_secure_roulette_log','cost_type') IS NULL
+                    ALTER TABLE dbo.cms_secure_roulette_log ADD cost_type VARCHAR(32) NULL;
+                IF COL_LENGTH('dbo.cms_secure_roulette_log','cost_amount') IS NULL
+                    ALTER TABLE dbo.cms_secure_roulette_log ADD cost_amount INT NOT NULL CONSTRAINT DF_rulette_cost_v2 DEFAULT 0;
+                IF COL_LENGTH('dbo.cms_secure_roulette_log','client_ip_hash') IS NULL
+                    ALTER TABLE dbo.cms_secure_roulette_log ADD client_ip_hash CHAR(64) NULL;
             END
         ");
     };
@@ -107,6 +125,7 @@ return static function(
             $slots[$i]=[
                 'type'=>$type,
                 'amount'=>$amount,
+                'weight'=>$cfgInt('slot'.$i.'_weight',100,0,1000000),
             ];
         }
 
@@ -161,10 +180,11 @@ return static function(
     };
 
     $creditReward = static function(
+        $tx,
         string $accountId,
         string $type,
         int $amount
-    ) use($db,$rewardBackendStatus): void {
+    ) use($rewardBackendStatus): void {
         $status=$rewardBackendStatus();
 
         if(empty($status[$type])){
@@ -178,7 +198,7 @@ return static function(
         }
 
         if($type==='WCoinC'){
-            $affected=$db->execute(
+            $affected=$tx->execute(
                 "UPDATE dbo.CashShopData
                  SET WCoinC=ISNULL(WCoinC,0)+:amount
                  WHERE AccountID=:account",
@@ -191,7 +211,7 @@ return static function(
         }
 
         if($type==='WCoinP'){
-            $affected=$db->execute(
+            $affected=$tx->execute(
                 "UPDATE dbo.CashShopData
                  SET WCoinP=ISNULL(WCoinP,0)+:amount
                  WHERE AccountID=:account",
@@ -204,7 +224,7 @@ return static function(
         }
 
         if($type==='GoblinPoint'){
-            $affected=$db->execute(
+            $affected=$tx->execute(
                 "UPDATE dbo.CashShopData
                  SET GoblinPoint=ISNULL(GoblinPoint,0)+:amount
                  WHERE AccountID=:account",
@@ -217,7 +237,7 @@ return static function(
         }
 
         if($type==='Credits'){
-            $affected=$db->execute(
+            $affected=$tx->execute(
                 "UPDATE dbo.memb_credits
                  SET credits=ISNULL(credits,0)+:amount
                  WHERE memb___id=:account",
@@ -230,6 +250,107 @@ return static function(
         }
 
         throw new \RuntimeException('Tipo de premio no permitido.');
+    };
+
+    $currencyColumn = static function(string $type): array {
+        return match($type){
+            'WCoinC'=>['CashShopData','AccountID','WCoinC'],
+            'WCoinP'=>['CashShopData','AccountID','WCoinP'],
+            'GoblinPoint'=>['CashShopData','AccountID','GoblinPoint'],
+            'Credits'=>['memb_credits','memb___id','credits'],
+            default=>throw new \RuntimeException('Moneda no soportada.'),
+        };
+    };
+
+    $debitCurrency = static function(
+        $tx,
+        string $accountId,
+        string $type,
+        int $amount
+    ) use($rewardBackendStatus,$currencyColumn): void {
+        if($amount<=0) return;
+        if($amount>1000000) throw new \RuntimeException('Costo por giro fuera de rango.');
+
+        $status=$rewardBackendStatus();
+        if(empty($status[$type])){
+            throw new \RuntimeException('El backend de costo '.$type.' no está disponible.');
+        }
+
+        [$table,$idColumn,$valueColumn]=$currencyColumn($type);
+        $affected=$tx->execute(
+            "UPDATE dbo.{$table}
+             SET {$valueColumn}=ISNULL({$valueColumn},0)-:amount
+             WHERE {$idColumn}=:account
+               AND ISNULL({$valueColumn},0)>=:amount2",
+            ['amount'=>$amount,'account'=>$accountId,'amount2'=>$amount]
+        );
+
+        if($affected<1){
+            throw new \RuntimeException('Saldo insuficiente para girar la ruleta.');
+        }
+    };
+
+    $weightedSlot = static function(array $slots): int {
+        $total=0;
+        foreach($slots as $slot){
+            $total+=(int)($slot['weight']??0);
+        }
+
+        if($total<=0){
+            throw new \RuntimeException('No hay premios activos: todos los pesos están en 0.');
+        }
+
+        $pick=random_int(1,$total);
+        $cursor=0;
+
+        foreach($slots as $slotNo=>$slot){
+            $cursor+=(int)($slot['weight']??0);
+            if($pick<=$cursor) return (int)$slotNo;
+        }
+
+        throw new \RuntimeException('No fue posible seleccionar un premio.');
+    };
+
+    $dailySpinCount = static function(string $accountId) use($db): int {
+        $row=$db->fetchOne(
+            "SELECT COUNT(*) AS total
+             FROM dbo.cms_secure_roulette_log
+             WHERE account_id=:account
+               AND created_at>=CONVERT(date,SYSUTCDATETIME())
+               AND created_at<DATEADD(DAY,1,CONVERT(date,SYSUTCDATETIME()))",
+            ['account'=>$accountId]
+        );
+        return (int)($row['total']??0);
+    };
+
+    $campaignStatus = static function() use($config): array {
+        $startRaw=trim((string)($config['campaign_start']??''));
+        $endRaw=trim((string)($config['campaign_end']??''));
+        $now=time();
+
+        $start=$startRaw!==''?strtotime($startRaw):false;
+        $end=$endRaw!==''?strtotime($endRaw):false;
+
+        if($startRaw!=='' && $start===false) return ['active'=>false,'reason'=>'Fecha inicial de campaña inválida.'];
+        if($endRaw!=='' && $end===false) return ['active'=>false,'reason'=>'Fecha final de campaña inválida.'];
+        if($start!==false && $now<$start) return ['active'=>false,'reason'=>'La campaña todavía no comenzó.'];
+        if($end!==false && $now>$end) return ['active'=>false,'reason'=>'La campaña ya finalizó.'];
+
+        return ['active'=>true,'reason'=>''];
+    };
+
+    $accountOnline = static function(string $accountId) use($db,$tableExists,$columnExists): bool {
+        if(!$tableExists('MEMB_STAT')
+            || !$columnExists('MEMB_STAT','memb___id')
+            || !$columnExists('MEMB_STAT','ConnectStat')){
+            return false;
+        }
+
+        $row=$db->fetchOne(
+            "SELECT TOP 1 ConnectStat FROM dbo.MEMB_STAT WHERE memb___id=:account",
+            ['account'=>$accountId]
+        );
+        return (int)($row['ConnectStat']??0)>0;
     };
 
     $remainingSeconds = static function(
@@ -259,7 +380,7 @@ return static function(
         $limit=max(5,min(100,$limit));
         return $db->fetchAll(
             "SELECT TOP {$limit}
-                slot_no,reward_type,reward_amount,created_at
+                slot_no,reward_type,reward_amount,reward_weight,cost_type,cost_amount,created_at
              FROM dbo.cms_secure_roulette_log
              WHERE account_id=:account
              ORDER BY id DESC",
@@ -284,7 +405,14 @@ return static function(
 .srw .srw-grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:18px}
 .srw .srw-panel{background:linear-gradient(145deg,#121b24,#0d141b);border:1px solid var(--border);border-radius:12px;padding:16px}
 .srw .srw-wheel{position:relative;width:420px;height:420px;max-width:100%;aspect-ratio:1/1;margin:0 auto;border-radius:50%;border:9px solid #8a6b30;box-shadow:0 0 0 5px #211b10,0 0 40px rgba(221,182,90,.09);overflow:hidden;background:#111}
-.srw .srw-wheel-inner{position:absolute;inset:0;border-radius:50%;transition:transform 4.6s cubic-bezier(.12,.65,.11,1)}
+.srw .srw-wheel-inner{position:absolute;inset:0;border-radius:50%;will-change:transform;transform:rotate(0deg)}
+.srw.srw-animating .srw-wheel-inner{transition:transform 5.6s cubic-bezier(.08,.72,.12,1)}
+.srw .srw-pointer{transition:filter .12s ease,transform .12s ease}
+.srw.srw-tick .srw-pointer{transform:translateX(-50%) rotate(-8deg) scale(1.08);filter:drop-shadow(0 0 8px #f5d878)}
+.srw .srw-wheel{transition:box-shadow .25s ease}
+.srw.srw-animating .srw-wheel{box-shadow:0 0 0 5px #211b10,0 0 54px rgba(221,182,90,.28)}
+.srw .srw-prize-pending{opacity:0;transform:translateY(-6px);max-height:0;overflow:hidden;margin:0;padding-top:0;padding-bottom:0;border-width:0;transition:opacity .35s ease,transform .35s ease,max-height .35s ease,margin .35s ease,padding .35s ease}
+.srw.srw-settled .srw-prize-pending{opacity:1;transform:none;max-height:100px;margin-bottom:14px;padding:12px;border-width:1px}
 .srw .srw-wheel-labels{position:absolute;inset:0}
 .srw .srw-seg{position:absolute;left:50%;top:50%;width:45%;transform-origin:0 0;font-size:12px;font-weight:900;color:#fff;text-shadow:0 1px 3px #000;white-space:nowrap}
 .srw .srw-pointer{position:absolute;left:50%;top:-2px;transform:translateX(-50%);z-index:5;width:0;height:0;border-left:18px solid transparent;border-right:18px solid transparent;border-top:0;border-bottom:34px solid #e7c86e;filter:drop-shadow(0 2px 3px #000)}
@@ -311,6 +439,10 @@ CSS;
     $slots=$rewardSlots();
     $backend=$rewardBackendStatus();
 
+    if($hook==='site.head'){
+        return '<script defer src="/module-assets/secure-roulette/assets/roulette-pro.js?v=210"></script>';
+    }
+
     if($hook==='admin.panel'){
         $logCount=(int)(($db->fetchOne(
             "SELECT COUNT(*) AS total FROM dbo.cms_secure_roulette_log"
@@ -330,8 +462,8 @@ CSS;
         <div class="srw">
           <div class="srw-hero">
             <span class="eyebrow">MODULE SECURITY CENTER</span>
-            <h2>🎰 Secure Roulette</h2>
-            <p class="muted">Ruleta server-side para Omega Web.</p>
+            <h2>🎰 Secure Roulette PRO v2</h2>
+            <p class="muted">Ruleta server-side con probabilidades ponderadas, costo opcional, límite diario y campañas.</p>
           </div>
 
           <div class="srw-kpis">
@@ -369,7 +501,17 @@ CSS;
 
     $enabled=$cfgBool('enabled',true);
     $cooldownMinutes=$cfgInt('cooldown_minutes',1440,0,525600);
+    $dailyLimit=$cfgInt('daily_spin_limit',1,0,1000);
     $historyLimit=$cfgInt('history_limit',20,5,100);
+    $requireOffline=$cfgBool('require_offline',false);
+    $campaign=$campaignStatus();
+
+    $costType=(string)($config['spin_cost_type']??'None');
+    if(!in_array($costType,['None','WCoinC','WCoinP','GoblinPoint','Credits'],true)){
+        $costType='None';
+    }
+    $costAmount=$cfgInt('spin_cost_amount',0,0,1000000);
+    if($costType==='None') $costAmount=0;
 
     $method=strtoupper((string)($payload['method']??'GET'));
     $post=(array)($payload['post']??[]);
@@ -383,10 +525,15 @@ CSS;
     if($method==='POST' && isset($post['spin'])){
         if(!$enabled){
             $error='La ruleta está temporalmente desactivada.';
+        }elseif(!$campaign['active']){
+            $error=(string)$campaign['reason'];
+        }elseif($requireOffline && $accountOnline($accountId)){
+            $error='Debes desconectarte del juego antes de girar.';
         }else{
             try{
                 $result=$db->transaction(function($tx) use(
-                    $accountId,$cooldownMinutes,$slots,$creditReward,$log
+                    $accountId,$cooldownMinutes,$dailyLimit,$slots,$creditReward,
+                    $weightedSlot,$debitCurrency,$costType,$costAmount,$log
                 ){
                     /*
                      * Bloqueo por rango/clave para esta cuenta.
@@ -453,19 +600,39 @@ CSS;
                         }
                     }
 
-                    // El navegador jamás decide esto.
-                    $slot=random_int(1,8);
+                    if($dailyLimit>0){
+                        $dailyRow=$tx->fetchOne(
+                            "SELECT COUNT(*) AS total
+                             FROM dbo.cms_secure_roulette_log WITH(HOLDLOCK)
+                             WHERE account_id=:account
+                               AND created_at>=CONVERT(date,SYSUTCDATETIME())
+                               AND created_at<DATEADD(DAY,1,CONVERT(date,SYSUTCDATETIME()))",
+                            ['account'=>$accountId]
+                        );
+
+                        if((int)($dailyRow['total']??0)>=$dailyLimit){
+                            throw new \RuntimeException('Ya alcanzaste el límite diario de giros.');
+                        }
+                    }
+
+                    if($costAmount>0 && $costType!=='None'){
+                        $debitCurrency($tx,$accountId,$costType,$costAmount);
+                    }
+
+                    // El navegador jamás decide esto: selección ponderada server-side.
+                    $slot=$weightedSlot($slots);
                     $reward=$slots[$slot];
 
                     $type=(string)$reward['type'];
                     $amount=(int)$reward['amount'];
+                    $weight=(int)($reward['weight']??0);
 
                     if($amount<0 || $amount>1000000){
                         throw new \RuntimeException('Premio fuera de rango.');
                     }
 
                     // Acreditar dentro de la misma transacción SQL.
-                    $creditReward($accountId,$type,$amount);
+                    $creditReward($tx,$accountId,$type,$amount);
 
                     $tx->execute(
                         "UPDATE dbo.cms_secure_roulette_state
@@ -478,15 +645,23 @@ CSS;
 
                     $tx->execute(
                         "INSERT INTO dbo.cms_secure_roulette_log(
-                            account_id,slot_no,reward_type,reward_amount,created_at
+                            account_id,slot_no,reward_type,reward_amount,reward_weight,
+                            cost_type,cost_amount,client_ip_hash,created_at
                          ) VALUES(
-                            :account,:slot,:type,:amount,SYSUTCDATETIME()
+                            :account,:slot,:type,:amount,:weight,
+                            :cost_type,:cost_amount,:ip_hash,SYSUTCDATETIME()
                          )",
                         [
                             'account'=>$accountId,
                             'slot'=>$slot,
                             'type'=>$type,
                             'amount'=>$amount,
+                            'weight'=>$weight,
+                            'cost_type'=>$costType==='None'?null:$costType,
+                            'cost_amount'=>$costAmount,
+                            'ip_hash'=>!empty($_SERVER['REMOTE_ADDR'])
+                                ? hash('sha256',(string)$_SERVER['REMOTE_ADDR'])
+                                : null,
                         ]
                     );
 
@@ -495,7 +670,9 @@ CSS;
                         'Spin account='.$accountId.
                         ' slot='.$slot.
                         ' reward='.$type.
-                        ' amount='.$amount
+                        ' amount='.$amount.
+                        ' weight='.$weight.
+                        ' cost='.$costType.':'.$costAmount
                     );
 
                     return [
@@ -522,14 +699,19 @@ CSS;
     // se aplica dentro de la transacción.
     if($cooldownMinutes===0) $remaining=0;
 
+    $todaySpins=$dailySpinCount($accountId);
+    $dailyRemaining=$dailyLimit>0?max(0,$dailyLimit-$todaySpins):null;
     $historyRows=$history($accountId,$historyLimit);
+    $totalWeight=array_sum(array_map(static fn($slot)=>(int)($slot['weight']??0),$slots));
 
     $slotCards='';
     foreach($slots as $no=>$reward){
         $ok=!empty($backend[$reward['type']]);
+        $probability=$totalWeight>0?((int)($reward['weight']??0)/$totalWeight*100):0;
         $slotCards.='<div class="srw-slot">
             <span>#'.$no.' · '.$e($rewardLabel($reward['type'])).'</span>
             <strong class="'.($ok?'ok':'bad').'">'.$e((string)$reward['amount']).'</strong>
+            <small>'.number_format($probability,2).'%</small>
         </div>';
     }
 
@@ -538,7 +720,7 @@ CSS;
         $historyHtml='<div class="srw-note">Todavía no tienes giros registrados.</div>';
     }else{
         $historyHtml='<div class="srw-history"><table><thead><tr>
-            <th>Fecha</th><th>Slot</th><th>Premio</th><th>Cantidad</th>
+            <th>Fecha</th><th>Slot</th><th>Premio</th><th>Cantidad</th><th>Costo</th>
         </tr></thead><tbody>';
 
         foreach($historyRows as $row){
@@ -547,6 +729,9 @@ CSS;
                 <td>#'.(int)$row['slot_no'].'</td>
                 <td>'.$e($rewardLabel((string)$row['reward_type'])).'</td>
                 <td>'.number_format((int)$row['reward_amount'],0,',','.').'</td>
+                <td>'.((int)($row['cost_amount']??0)>0
+                    ? $e($rewardLabel((string)($row['cost_type']??''))).' '.number_format((int)$row['cost_amount'],0,',','.')
+                    : 'Gratis').'</td>
             </tr>';
         }
 
@@ -576,13 +761,14 @@ CSS;
 
     $rotation=0;
     if($wonSlot>0){
-        // Center of target segment at pointer (top), plus 6 full rotations.
+        // Center of target segment at pointer (top), plus 8 full rotations.
+        // El HTML NO se entrega pre-rotado; JS inicia desde 0 y anima hasta aquí.
         $targetCenter=(($wonSlot-1)*45)+22.5;
-        $rotation=2160 + (360 - $targetCenter);
+        $rotation=2880 + (360 - $targetCenter);
     }
 
     $html=$styles();
-    $html.='<div class="srw">
+    $html.='<div class="srw" data-winning-slot="'.$wonSlot.'" data-winning-rotation="'.$rotation.'" data-spin-duration="5600">
       <div class="srw-hero">
         <span class="eyebrow">MY ACCOUNT · SERVER SIDE</span>
         <h2>🎰 Ruleta Segura</h2>
@@ -590,7 +776,7 @@ CSS;
       </div>';
 
     if($wonSlot>0){
-        $html.='<div class="srw-prize">
+        $html.='<div class="srw-prize'.($wonSlot>0?' srw-prize-pending':'').'">
             🎉 Premio acreditado:
             <strong>'.$e($rewardLabel($wonType)).' +'.number_format($wonAmount,0,',','.').'</strong>
         </div>';
@@ -604,7 +790,8 @@ CSS;
         <div class="srw-kpi"><span>Estado</span><strong class="'.($enabled?'ok':'bad').'">'.($enabled?'ACTIVA':'OFFLINE').'</strong></div>
         <div class="srw-kpi"><span>Cooldown</span><strong>'.($cooldownMinutes>0?$cooldownMinutes.' min':'Libre').'</strong></div>
         <div class="srw-kpi"><span>Próximo giro</span><strong>'.($remaining>0?$e($formatWait($remaining)):'Disponible').'</strong></div>
-        <div class="srw-kpi"><span>Seguridad</span><strong class="ok">SERVER SIDE</strong></div>
+        <div class="srw-kpi"><span>Giros hoy</span><strong>'.$todaySpins.($dailyLimit>0?' / '.$dailyLimit:'').'</strong></div>
+        <div class="srw-kpi"><span>Costo</span><strong>'.($costAmount>0&&$costType!=='None'?$e($rewardLabel($costType)).' '.number_format($costAmount,0,',','.'):'Gratis').'</strong></div>
     </div>
 
     <div class="srw-grid">
@@ -612,7 +799,7 @@ CSS;
         <div class="srw-wheel">
           <div class="srw-pointer"></div>
           <div class="srw-wheel-inner" id="srwWheel"
-               style="background:'.$e($wheelGradient).';'.($wonSlot>0?'transform:rotate('.$rotation.'deg);':'').'">
+               style="background:'.$e($wheelGradient).';transform:rotate(0deg)">
             <div class="srw-wheel-labels">'.$labels.'</div>
           </div>
           <div class="srw-center">Ω</div>
@@ -622,6 +809,12 @@ CSS;
 
     if(!$enabled){
         $html.='<button class="srw-btn" type="button" disabled>Ruleta desactivada</button>';
+    }elseif(!$campaign['active']){
+        $html.='<button class="srw-btn" type="button" disabled>'.$e((string)$campaign['reason']).'</button>';
+    }elseif($requireOffline && $accountOnline($accountId)){
+        $html.='<button class="srw-btn" type="button" disabled>Debes estar offline</button>';
+    }elseif($dailyRemaining!==null && $dailyRemaining<=0){
+        $html.='<button class="srw-btn" type="button" disabled>Límite diario alcanzado</button>';
     }elseif($remaining>0){
         $html.='<button class="srw-btn" type="button" disabled>Disponible en '.$e($formatWait($remaining)).'</button>';
     }else{
@@ -654,37 +847,8 @@ CSS;
     </section>
     </div>';
 
-    if($wonSlot>0){
-        $html.='<script>
-        document.addEventListener("DOMContentLoaded",function(){
-            var wheel=document.getElementById("srwWheel");
-            if(!wheel) return;
-            wheel.style.transform="rotate(0deg)";
-            requestAnimationFrame(function(){
-                requestAnimationFrame(function(){
-                    wheel.style.transform="rotate('.$rotation.'deg)";
-                });
-            });
-        });
-        </script>';
-    }
-
-    $html.='<script>
-    document.addEventListener("DOMContentLoaded",function(){
-        var form=document.getElementById("srwForm");
-        if(!form) return;
-        form.addEventListener("submit",function(){
-            var btn=document.getElementById("srwSpinButton");
-            if(btn){
-                btn.disabled=true;
-                btn.textContent="Procesando premio...";
-            }
-        });
-    });
-    </script>';
-
     return [
-        'title'=>'Ruleta Segura',
+        'title'=>'Secure Roulette PRO',
         'html'=>$html
     ];
 };
