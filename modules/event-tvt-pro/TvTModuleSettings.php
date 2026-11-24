@@ -73,6 +73,9 @@ final class OmegaTvTModuleSettings
     {
         $mode=strtolower(trim((string)($data['header_mode']??'design')));
         if(!in_array($mode,['design','banner','none'],true)) $mode='design';
+        if($mode==='banner' && (string)($this->get()['banner_path']??'')===''){
+            throw new RuntimeException('Primero sube una imagen antes de activar Banner personalizado.');
+        }
 
         $eyebrow=$this->clip((string)($data['design_eyebrow']??''),120);
         $title=$this->clip((string)($data['design_title']??''),160);
