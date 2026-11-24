@@ -91,14 +91,13 @@ CSS;
         </div>';
     }
 
-    if($hook!=='user.page') return null;
+    if($hook!=='ranking.page') return null;
 
     $accountId=trim((string)($payload['account_id']??''));
-    if($accountId==='') throw new RuntimeException('No se recibió una cuenta autenticada.');
 
     if(!$service->ready()){
         return [
-            'title'=>'Eventos · TvT',
+            'available'=>false,
             'html'=>$styles().'<div class="tvt"><div class="empty"><h3>TvT no está disponible</h3><p>Falta alguna de las tablas o columnas requeridas: <code>TvTMatch</code>, <code>TvTResult</code> y <code>TvTAction</code>.</p></div></div>'
         ];
     }
@@ -106,6 +105,20 @@ CSS;
     $query=(array)($payload['query']??[]);
     $sessionKey=trim((string)($query['session']??''));
     $playerName=trim((string)($query['player']??''));
+
+    $showAccountCharacters=$cfgBool('show_account_characters',true);
+    $accountCharacters=($showAccountCharacters && $accountId!=='')
+        ? $service->accountCharacters($accountId)
+        : [];
+    $ownedNames=array_values(array_filter(array_map(
+        static fn(array $row): string => trim((string)($row['Name']??'')),
+        $accountCharacters
+    )));
+
+    $myCharacter=trim((string)($query['my_character']??''));
+    if($myCharacter!=='' && in_array($myCharacter,$ownedNames,true)){
+        $playerName=$myCharacter;
+    }
 
     $recentLimit=max(5,min(100,(int)($config['recent_matches']??20)));
     $rankingLimit=max(10,min(100,(int)($config['ranking_limit']??30)));
@@ -133,6 +146,36 @@ CSS;
         ($showRewards?'<div class="kpi"><span>Zen entregado</span><strong>'.number_format((int)$overview['zen'],0,',','.').'</strong></div>':'').
       '</div>';
 
+    if($showAccountCharacters && $accountId!==''){
+        $html.='<div class="panel" style="margin-bottom:14px">
+          <span class="eyebrow">MI CUENTA · TVT</span>
+          <h3>Mis personajes</h3>';
+
+        if($accountCharacters){
+            $html.='<form method="get" action="/rankings" class="toolbar">
+              <input type="hidden" name="type" value="tvt">
+              <label>Personaje
+                <select name="my_character">
+                  <option value="">Selecciona un personaje</option>';
+
+            foreach($accountCharacters as $character){
+                $name=(string)($character['Name']??'');
+                $html.='<option value="'.$e($name).'" '.($playerName===$name?'selected':'').'>'.$e($name).
+                    ' · Lv '.number_format((int)($character['cLevel']??0),0,',','.').
+                    ' · R'.number_format((int)($character['ResetCount']??0),0,',','.').'</option>';
+            }
+
+            $html.='</select></label>
+              <button class="btn" type="submit">Ver estadísticas TvT</button>
+              '.($myCharacter!==''?'<a class="btn" href="/rankings?type=tvt">Limpiar</a>':'').'
+            </form>';
+        }else{
+            $html.='<p class="muted">Esta cuenta todavía no tiene personajes disponibles.</p>';
+        }
+
+        $html.='</div>';
+    }
+
     if($sessionKey!==''){
         $session=$service->session($sessionKey,$timelineLimit);
         if($session){
@@ -148,7 +191,7 @@ CSS;
             $html.='<section class="panel session">
               <div class="session-head">
                 <div><span class="eyebrow">MATCH DETAIL</span><h3>'.$e((string)$match['EventName']).'</h3><code>'.$e((string)$match['SessionKey']).'</code></div>
-                <div><a class="btn" href="/account/modules/event-tvt-pro">← Volver</a></div>
+                <div><a class="btn" href="/rankings?type=tvt">← Volver</a></div>
               </div>
               <div class="kpis">
                 <div class="kpi"><span>Inicio</span><strong style="font-size:14px">'.$e((string)$match['StartedAt']).'</strong></div>
@@ -220,7 +263,7 @@ CSS;
             $winRate=$matchesCount>0?$wins/$matchesCount*100:0;
             $deaths=(int)$player['Deaths'];$kd=$deaths>0?(int)$player['Kills']/$deaths:(float)(int)$player['Kills'];
             $html.='<section class="panel">
-              <div class="session-head"><div><span class="eyebrow">PLAYER PROFILE</span><h3>'.$e((string)$player['CharacterName']).'</h3><span class="muted">'.$e((string)$player['Account']).'</span></div><a class="btn" href="/account/modules/event-tvt-pro">← Volver</a></div>
+              <div class="session-head"><div><span class="eyebrow">PLAYER PROFILE</span><h3>'.$e((string)$player['CharacterName']).'</h3><span class="muted">'.$e((string)$player['Account']).'</span></div><a class="btn" href="/rankings?type=tvt">← Volver</a></div>
               <div class="kpis">
                 <div class="kpi"><span>Partidas</span><strong>'.$matchesCount.'</strong></div>
                 <div class="kpi"><span>Victorias</span><strong class="win">'.$wins.'</strong></div>
@@ -231,7 +274,7 @@ CSS;
               </div>
               <h3>Últimas participaciones</h3><div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Evento</th><th>Resultado</th><th>Sesión</th></tr></thead><tbody>';
             foreach($player['Recent'] as $r){
-                $html.='<tr><td>'.$e((string)$r['CreatedAt']).'</td><td>'.$e((string)($r['EventName']??'TvT')).'</td><td><span class="badge '.(strtoupper((string)$r['Result'])==='WIN'?'win':'loss').'">'.$e((string)$r['Result']).'</span></td><td><a class="btn" href="/account/modules/event-tvt-pro?session='.rawurlencode((string)$r['SessionKey']).'">Ver partida</a></td></tr>';
+                $html.='<tr><td>'.$e((string)$r['CreatedAt']).'</td><td>'.$e((string)($r['EventName']??'TvT')).'</td><td><span class="badge '.(strtoupper((string)$r['Result'])==='WIN'?'win':'loss').'">'.$e((string)$r['Result']).'</span></td><td><a class="btn" href="/rankings?type=tvt&session='.rawurlencode((string)$r['SessionKey']).'">Ver partida</a></td></tr>';
             }
             $html.='</tbody></table></div></section>';
         }else{
@@ -246,7 +289,7 @@ CSS;
             $wr=$matchesCount>0?$wins/$matchesCount*100:0;
             $deaths=(int)$r['Deaths'];$kd=$deaths>0?(int)$r['Kills']/$deaths:(float)(int)$r['Kills'];
             $mine=strcasecmp((string)$r['Account'],$accountId)===0?' mine':'';
-            $html.='<a class="rank-row'.$mine.'" href="/account/modules/event-tvt-pro?player='.rawurlencode((string)$r['CharacterName']).'">
+            $html.='<a class="rank-row'.$mine.'" href="/rankings?type=tvt&player='.rawurlencode((string)$r['CharacterName']).'">
               <div class="rank-pos">#'.$pos.'</div>
               <div class="rank-name"><strong>'.$e((string)$r['CharacterName']).'</strong><small>'.$e((string)$r['Account']).'</small></div>
               <div class="stat"><small>W / L</small><b class="win">'.$wins.'</b> / <b class="loss">'.$losses.'</b></div>
@@ -262,7 +305,7 @@ CSS;
         <aside class="panel"><span class="eyebrow">LATEST MATCHES</span><h3>Partidas recientes</h3>';
         foreach($matches as $m){
             $winner=(string)($m['WinnerCharacter']??'');
-            $html.='<a class="rank-row" style="grid-template-columns:1fr auto" href="/account/modules/event-tvt-pro?session='.rawurlencode((string)$m['SessionKey']).'">
+            $html.='<a class="rank-row" style="grid-template-columns:1fr auto" href="/rankings?type=tvt&session='.rawurlencode((string)$m['SessionKey']).'">
               <div class="rank-name"><strong>'.$e((string)$m['EventName']).'</strong><small>'.$e((string)$m['StartedAt']).' · '.(int)$m['EntryCount'].' jugadores</small></div>
               <div class="stat"><small>Ganador</small><b class="win">'.$e($winner!==''?$winner:'—').'</b></div>
             </a>';
@@ -273,5 +316,5 @@ CSS;
 
     $html.='</div>';
 
-    return ['title'=>'Eventos · TvT','html'=>$html];
+    return ['available'=>true,'html'=>$html];
 };
