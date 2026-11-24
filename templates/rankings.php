@@ -8,6 +8,7 @@ $availability=$availability ?? [];
 $visualAssets=$visualAssets ?? []; $nameRenderer=$nameRenderer??null;
 $guildProfessional=$guildProfessional??null;
 $eventStats=$eventStats??null;
+$tvtRanking=$tvtRanking??null;
 
 $tabs=[
  'level'=>['Nivel','Personajes'],
@@ -16,6 +17,7 @@ $tabs=[
  'guilds'=>['Guilds','Personajes'],
  'bloodcastle'=>['Blood Castle','Eventos'],
  'devilsquare'=>['Devil Square','Eventos'],
+ 'tvt'=>['TvT','Eventos'],
  'duel'=>['Duelos','Sistemas'],
  'skyevent'=>['Sky Event','Sistemas'],
  'monsterpoints'=>['Monster Points','Sistemas'],
@@ -37,6 +39,7 @@ $descriptions=[
  'guilds'=>'Directorio profesional de clanes, Guild Masters, miembros y resets acumulados.',
  'bloodcastle'=>'Hall of Fame de Blood Castle: score oficial, progreso y estado actual del personaje.',
  'devilsquare'=>'Hall of Fame de Devil Square: score oficial, progreso y estado actual del personaje.',
+ 'tvt'=>'Team vs Team: ranking global, partidas, rendimiento PvP y estadísticas por personaje.',
  'duel'=>'Clasificación PvP basada en Rating, victorias y rachas.',
  'skyevent'=>'Rendimiento histórico acumulado en Sky Event.',
  'monsterpoints'=>'Personajes con mayor saldo y puntos obtenidos por monstruos.',
@@ -78,7 +81,12 @@ $descriptions=[
 <?php endforeach; ?>
 </div>
 
-<?php if($type==='guilds'): ?>
+<?php if($type==='tvt'): ?>
+    <?= is_array($tvtRanking)
+        ? (string)($tvtRanking['html']??'<div class="notice-box danger">TvT no disponible.</div>')
+        : '<div class="notice-box danger">TvT no disponible.</div>' ?>
+
+<?php elseif($type==='guilds'): ?>
 <?php
 $gp=$guildProfessional??[];
 $gpGuilds=$gp['guilds']??[];

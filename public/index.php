@@ -399,7 +399,7 @@ try {
         $type = strtolower((string)($_GET['type'] ?? 'level'));
         $allowed = [
             'level','reset','grandreset','guilds',
-            'bloodcastle','devilsquare',
+            'bloodcastle','devilsquare','tvt',
             'duel','skyevent','monsterpoints','minigames','goldenarcher',
             'dark-wizard','soul-master','dark-knight','blade-knight',
             'fairy-elf','muse-elf','magic-gladiator'
@@ -408,6 +408,7 @@ try {
         if (!in_array($type,$allowed,true)) $type='level';
 
         $availability = $driver->rankingAvailability();
+        $availability['tvt']=$moduleRuntime->isEnabled('event-tvt-pro');
 
         if (array_key_exists($type,$availability) && !$availability[$type]) {
             $type='level';
@@ -415,8 +416,23 @@ try {
 
         $guildProfessional=null;
         $eventStats=null;
+        $tvtRanking=null;
 
-        if($type==='guilds'){
+        if($type==='tvt'){
+            try{
+                $tvtRanking=$moduleRuntime->invoke('event-tvt-pro','ranking.page',[
+                    'account_id'=>$auth->currentId(),
+                    'query'=>$_GET,
+                    'path'=>$path,
+                ]);
+            }catch(Throwable $e){
+                $tvtRanking=[
+                    'available'=>false,
+                    'html'=>'<div class="notice-box danger">No fue posible cargar el ranking TvT.</div>'
+                ];
+            }
+            $rows=[];
+        }elseif($type==='guilds'){
             $guildProfessional=$guildRankingProfessional->load(
                 $_GET,
                 $adminManager->settings()
@@ -442,7 +458,8 @@ try {
             'visualAssets'=>$visualAssets->map(),
             'nameRenderer'=>$nameRenderer,
             'guildProfessional'=>$guildProfessional,
-            'eventStats'=>$eventStats
+            'eventStats'=>$eventStats,
+            'tvtRanking'=>$tvtRanking
         ]);
         exit;
     }
