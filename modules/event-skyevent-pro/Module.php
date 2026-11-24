@@ -26,7 +26,7 @@ return static function(string $hook,array $payload,array $config,array $context)
 .skypro .sky-hero h2{position:relative;font-size:25px;line-height:1.2;margin:5px 0 7px;color:#d8f2ff}
 .skypro .sky-hero p{position:relative;max-width:760px;margin:0;line-height:1.55;color:#9db1bf}
 .skypro .sky-banner{margin-bottom:16px;border:1px solid #31516a;border-radius:14px;overflow:hidden;background:#091018}
-.skypro .sky-banner img{display:block;width:100%;height:auto;max-height:420px;object-fit:cover}
+.skypro .sky-banner img{display:block;width:100%}
 .skypro .sky-summary{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:9px;margin:0 0 16px}
 .skypro .sky-kpi{background:linear-gradient(180deg,#132432,#0d1821);border:1px solid var(--border);border-radius:10px;padding:12px}
 .skypro .sky-kpi span{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:#7694a8}
@@ -80,7 +80,7 @@ CSS;
 
         $header='';
         if($ui['header_mode']==='banner' && $ui['banner_path']!==''){
-            $header='<div class="sky-banner"><img src="'.$e($ui['banner_path']).'" alt="'.$e($ui['banner_alt']).'"></div>';
+            $header='<div class="sky-banner" style="height:'.(int)$ui['banner_height'].'px"><img src="'.$e($ui['banner_path']).'" alt="'.$e($ui['banner_alt']).'" style="height:100%;object-fit:'.$e($ui['banner_fit']).';object-position:'.$e($ui['banner_position']).'"></div>';
         }elseif($ui['header_mode']==='design'){
             $header='<div class="sky-hero">
               <span class="eyebrow">'.$e($ui['design_eyebrow']).'</span>
@@ -157,6 +157,26 @@ CSS;
                 </label>
                 <label class="field">Texto alternativo del banner
                   <input name="banner_alt" maxlength="180" value="'.$e($ui['banner_alt']).'">
+                </label>
+                <label class="field">Ajuste de imagen
+                  <select name="banner_fit">
+                    <option value="cover" '.($ui['banner_fit']==='cover'?'selected':'').'>Rellenar (cover)</option>
+                    <option value="contain" '.($ui['banner_fit']==='contain'?'selected':'').'>Encajar (contain)</option>
+                    <option value="fill" '.($ui['banner_fit']==='fill'?'selected':'').'>Estirar (fill)</option>
+                    <option value="scale-down" '.($ui['banner_fit']==='scale-down'?'selected':'').'>Tamaño natural (scale-down)</option>
+                  </select>
+                </label>
+                <label class="field">Posición
+                  <select name="banner_position">
+                    <option value="center" '.($ui['banner_position']==='center'?'selected':'').'>Centro</option>
+                    <option value="top" '.($ui['banner_position']==='top'?'selected':'').'>Arriba</option>
+                    <option value="bottom" '.($ui['banner_position']==='bottom'?'selected':'').'>Abajo</option>
+                    <option value="left" '.($ui['banner_position']==='left'?'selected':'').'>Izquierda</option>
+                    <option value="right" '.($ui['banner_position']==='right'?'selected':'').'>Derecha</option>
+                  </select>
+                </label>
+                <label class="field">Altura del banner (px)
+                  <input type="number" name="banner_height" min="160" max="720" value="'.(int)$ui['banner_height'].'">
                 </label>
                 <label class="field">Cantidad de jugadores
                   <input type="number" name="ranking_limit" min="10" max="100" value="'.(int)$ui['ranking_limit'].'">
