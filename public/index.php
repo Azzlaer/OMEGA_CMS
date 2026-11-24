@@ -1381,6 +1381,7 @@ try {
                     'action'=>$action,
                     'admin_account'=>$accountId,
                     'data'=>$_POST,
+                    'files'=>$_FILES,
                     'csrf_token'=>Csrf::token()
                 ]);
                 $_SESSION['_flash_success']=is_string($result)&&$result!==''?$result:'Acción del módulo ejecutada correctamente.';

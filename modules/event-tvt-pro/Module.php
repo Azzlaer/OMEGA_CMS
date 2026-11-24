@@ -2,11 +2,17 @@
 declare(strict_types=1);
 
 require_once __DIR__.'/TvTEventService.php';
+require_once __DIR__.'/TvTModuleSettings.php';
 
 return static function(string $hook,array $payload,array $config,array $context): mixed {
     /** @var \Omega\Core\Database $muDb */
     $muDb=$context['mu_db'];
+    /** @var \Omega\Core\Database $cmsDb */
+    $cmsDb=$context['cms_db'];
+    $root=(string)$context['root'];
+
     $service=new OmegaTvTEventService($muDb);
+    $settingsService=new OmegaTvTModuleSettings($cmsDb,$root);
 
     $e=static fn(mixed $v): string =>
         htmlspecialchars((string)$v,ENT_QUOTES|ENT_SUBSTITUTE,'UTF-8');
@@ -23,8 +29,20 @@ return static function(string $hook,array $payload,array $config,array $context)
 <style>
 .tvt{--blue:#4ba7ff;--red:#ff5f67;--gold:#e0ba62;--bg:#0b1218;--panel:#101923;--border:#283847;--muted:#8fa3b2;color:#e8eef3}
 .tvt *{box-sizing:border-box}.tvt a{text-decoration:none}
-.tvt .hero{position:relative;overflow:hidden;border:1px solid #384757;border-radius:14px;padding:24px;background:radial-gradient(circle at 12% 20%,rgba(75,167,255,.18),transparent 32%),radial-gradient(circle at 88% 20%,rgba(255,95,103,.16),transparent 32%),linear-gradient(135deg,#0c1722,#11151c 50%,#211012);margin-bottom:16px}
-.tvt .hero:before{content:"TVT";position:absolute;right:22px;top:-28px;font-size:145px;font-weight:900;letter-spacing:-.08em;color:rgba(255,255,255,.035)}
+.tvt .tvt-hero{position:relative;display:block;min-height:0;height:auto;overflow:hidden;border:1px solid #384757;border-radius:14px;padding:22px 24px;background:radial-gradient(circle at 12% 20%,rgba(75,167,255,.18),transparent 32%),radial-gradient(circle at 88% 20%,rgba(255,95,103,.16),transparent 32%),linear-gradient(135deg,#0c1722,#11151c 50%,#211012);margin-bottom:16px}
+.tvt .tvt-hero:before{content:"TVT";position:absolute;right:22px;top:-34px;font-size:118px;font-weight:900;letter-spacing:-.08em;color:rgba(255,255,255,.035);pointer-events:none}
+.tvt .tvt-hero h2{position:relative;font-size:25px;line-height:1.2;margin:5px 0 7px}
+.tvt .tvt-hero p{position:relative;max-width:760px;margin:0;line-height:1.55}
+.tvt .tvt-banner{margin-bottom:16px;border:1px solid #384757;border-radius:14px;overflow:hidden;background:#090f14}
+.tvt .tvt-banner img{display:block;width:100%;height:auto;max-height:420px;object-fit:cover}
+.tvt .tvt-admin-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.tvt .tvt-admin-field{display:grid;gap:6px}
+.tvt .tvt-admin-field input,.tvt .tvt-admin-field select,.tvt .tvt-admin-field textarea{width:100%;padding:10px 11px;border:1px solid #344553;border-radius:8px;background:#0b141c;color:#e9f0f5}
+.tvt .tvt-admin-field textarea{min-height:88px;resize:vertical}
+.tvt .tvt-choice{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tvt .tvt-choice label{display:flex;gap:8px;align-items:center;border:1px solid #2c3e4d;border-radius:9px;padding:10px;background:#0c151d}
+.tvt .tvt-banner-preview{max-width:100%;border-radius:10px;border:1px solid #334452;display:block}
+.tvt .tvt-admin-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 .tvt .eyebrow{font-size:10px;letter-spacing:.16em;color:#91a4b3;font-weight:900;text-transform:uppercase}
 .tvt h2,.tvt h3{margin:4px 0;color:#f2d37f}.tvt .muted{color:var(--muted)}
 .tvt .teams{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.tvt .blue{color:#75bdff}.tvt .red{color:#ff7c82}.tvt .win{color:#76dda5}.tvt .loss{color:#ff8989}
@@ -42,7 +60,7 @@ return static function(string $hook,array $payload,array $config,array $context)
 .tvt .timeline{display:grid;gap:6px}.tvt .event{display:grid;grid-template-columns:135px 150px minmax(150px,1fr) 80px;gap:8px;padding:8px;border-bottom:1px solid #1f2d38;align-items:center}.tvt .event:last-child{border-bottom:0}.tvt .event-time{color:#718697;font-variant-numeric:tabular-nums}.tvt .event-type{font-weight:900;color:#d7b760}.tvt .event-detail{color:#9eb0bc}
 .tvt .empty{padding:25px;text-align:center;border:1px dashed #354858;border-radius:9px;color:#8ca0af}.tvt .mine{box-shadow:inset 3px 0 0 #d4ad54;background:rgba(212,173,84,.04)}
 @media(max-width:1100px){.tvt .kpis{grid-template-columns:repeat(3,1fr)}.tvt .grid{grid-template-columns:1fr}}
-@media(max-width:720px){.tvt .kpis{grid-template-columns:1fr 1fr}.tvt .participants{grid-template-columns:1fr}.tvt .rank-row{grid-template-columns:32px 1fr 1fr}.tvt .rank-row .stat:nth-child(n+4){display:none}.tvt .event{grid-template-columns:1fr}.tvt .hero:before{font-size:95px}}
+@media(max-width:720px){.tvt .kpis{grid-template-columns:1fr 1fr}.tvt .participants{grid-template-columns:1fr}.tvt .rank-row{grid-template-columns:32px 1fr 1fr}.tvt .rank-row .stat:nth-child(n+4){display:none}.tvt .event{grid-template-columns:1fr}.tvt .tvt-hero:before{font-size:76px}.tvt .tvt-admin-grid{grid-template-columns:1fr}.tvt .tvt-choice{grid-template-columns:1fr}}
 </style>
 CSS;
     };
@@ -62,9 +80,34 @@ CSS;
         };
     };
 
+    if($hook==='admin.action'){
+        $action=(string)($payload['action']??'');
+        $data=(array)($payload['data']??[]);
+        $files=(array)($payload['files']??[]);
+
+        if($action==='save_settings'){
+            $settingsService->save($data);
+            return 'Configuración TvT guardada correctamente.';
+        }
+
+        if($action==='upload_banner'){
+            $settingsService->uploadBanner((array)($files['banner_image']??[]));
+            return 'Banner TvT subido y activado correctamente.';
+        }
+
+        if($action==='delete_banner'){
+            $settingsService->deleteBanner();
+            return 'Banner TvT eliminado. Se restauró el diseño TvT.';
+        }
+
+        throw new RuntimeException('Acción TvT no reconocida.');
+    }
+
     if($hook==='admin.panel'){
+        $ui=$settingsService->get();
         $diag=$service->diagnostics();
         $ready=true;$cards='';$missingRows='';
+
         foreach($diag as $table=>$d){
             if(!$d['exists'] || $d['missing']) $ready=false;
             $cards.='<div class="kpi"><span>'.$e($table).'</span><strong class="'.($d['exists']&&!$d['missing']?'win':'loss').'">'.($d['exists']&&!$d['missing']?'ONLINE':'REVISAR').'</strong><small class="muted">'.number_format((int)$d['count'],0,',','.').' registros</small></div>';
@@ -74,20 +117,102 @@ CSS;
         }
 
         $overview=$ready?$service->overview():['matches'=>0,'results'=>0,'players'=>0,'wins'=>0,'kills'=>0,'objectives'=>0,'zen'=>0];
+        $token=$e((string)($payload['csrf_token']??''));
+
+        $bannerPreview=$ui['banner_path']!==''
+            ? '<img class="tvt-banner-preview" src="'.$e($ui['banner_path']).'" alt="'.$e($ui['banner_alt']).'">'
+            : '<div class="empty">No hay banner personalizado cargado.</div>';
 
         return $styles().'<div class="tvt">
-          <div class="hero"><span class="eyebrow">EVENT MODULE DIAGNOSTICS</span><h2>🔵⚔️🔴 Evento TvT PRO</h2><p class="muted">Lectura directa de TvTMatch, TvTResult y TvTAction. El módulo no altera datos del GameServer.</p></div>
-          <div class="kpis">'.$cards.'</div>
-          <div class="kpis">
-            <div class="kpi"><span>Partidas</span><strong>'.number_format((int)$overview['matches'],0,',','.').'</strong></div>
-            <div class="kpi"><span>Resultados</span><strong>'.number_format((int)$overview['results'],0,',','.').'</strong></div>
-            <div class="kpi"><span>Jugadores</span><strong>'.number_format((int)$overview['players'],0,',','.').'</strong></div>
-            <div class="kpi"><span>Kills</span><strong>'.number_format((int)$overview['kills'],0,',','.').'</strong></div>
-            <div class="kpi"><span>Objetivos</span><strong>'.number_format((int)$overview['objectives'],0,',','.').'</strong></div>
-            <div class="kpi"><span>Zen entregado</span><strong>'.number_format((int)$overview['zen'],0,',','.').'</strong></div>
-          </div>'.
-          ($missingRows!==''?'<div class="panel"><h3>Columnas faltantes</h3><div class="table-wrap"><table><thead><tr><th>Tabla</th><th>Faltantes</th></tr></thead><tbody>'.$missingRows.'</tbody></table></div></div>':'').
-          '<div class="panel" style="margin-top:14px"><h3>Modo de integración</h3><p class="muted">READ ONLY · No ejecuta INSERT, UPDATE ni DELETE sobre TvTMatch, TvTResult o TvTAction.</p></div>
+          <div class="panel">
+            <span class="eyebrow">APARIENCIA</span>
+            <h3>Cabecera del Center TvT</h3>
+            <p class="muted">Elige un solo modo. Diseño TvT y Banner personalizado nunca se muestran juntos.</p>
+
+            <form method="post" action="/admin/modules/action">
+              <input type="hidden" name="_csrf" value="'.$token.'">
+              <input type="hidden" name="slug" value="event-tvt-pro">
+              <input type="hidden" name="module_action" value="save_settings">
+
+              <div class="tvt-choice">
+                <label><input type="radio" name="header_mode" value="design" '.($ui['header_mode']==='design'?'checked':'').'> Diseño TvT</label>
+                <label><input type="radio" name="header_mode" value="banner" '.($ui['header_mode']==='banner'?'checked':'').'> Banner personalizado</label>
+                <label><input type="radio" name="header_mode" value="none" '.($ui['header_mode']==='none'?'checked':'').'> Sin cabecera</label>
+              </div>
+
+              <div class="tvt-admin-grid" style="margin-top:14px">
+                <label class="tvt-admin-field">Eyebrow del diseño
+                  <input name="design_eyebrow" maxlength="120" value="'.$e($ui['design_eyebrow']).'">
+                </label>
+                <label class="tvt-admin-field">Título del diseño
+                  <input name="design_title" maxlength="160" value="'.$e($ui['design_title']).'">
+                </label>
+                <label class="tvt-admin-field" style="grid-column:1/-1">Descripción del diseño
+                  <textarea name="design_subtitle" maxlength="500">'.$e($ui['design_subtitle']).'</textarea>
+                </label>
+                <label class="tvt-admin-field">Texto alternativo del banner
+                  <input name="banner_alt" maxlength="180" value="'.$e($ui['banner_alt']).'">
+                </label>
+                <label class="tvt-admin-field">Partidas recientes
+                  <input type="number" name="recent_matches" min="5" max="100" value="'.(int)$ui['recent_matches'].'">
+                </label>
+                <label class="tvt-admin-field">Jugadores en ranking
+                  <input type="number" name="ranking_limit" min="10" max="100" value="'.(int)$ui['ranking_limit'].'">
+                </label>
+                <label class="tvt-admin-field">Acciones por partida
+                  <input type="number" name="timeline_limit" min="20" max="300" value="'.(int)$ui['timeline_limit'].'">
+                </label>
+              </div>
+
+              <div class="tvt-choice" style="margin-top:14px">
+                <label><input type="checkbox" name="show_account_characters" value="1" '.($ui['show_account_characters']?'checked':'').'> Mostrar “Mis personajes”</label>
+                <label><input type="checkbox" name="show_rewards" value="1" '.($ui['show_rewards']?'checked':'').'> Mostrar recompensas Zen</label>
+                <label><input type="checkbox" name="show_objectives" value="1" '.($ui['show_objectives']?'checked':'').'> Mostrar objetivos</label>
+              </div>
+
+              <div class="tvt-admin-actions">
+                <button class="btn btn-primary" type="submit">Guardar configuración TvT</button>
+                <a class="btn" href="/rankings?type=tvt" target="_blank" rel="noopener">Vista previa</a>
+              </div>
+            </form>
+          </div>
+
+          <div class="panel" style="margin-top:14px">
+            <span class="eyebrow">BANNER PERSONALIZADO</span>
+            <h3>Imagen del Center TvT</h3>
+            <p class="muted">JPG, PNG o WEBP · máximo 8 MB · recomendado 1600×420 o proporción similar.</p>
+            '.$bannerPreview.'
+            <div class="tvt-admin-actions">
+              <form method="post" action="/admin/modules/action" enctype="multipart/form-data">
+                <input type="hidden" name="_csrf" value="'.$token.'">
+                <input type="hidden" name="slug" value="event-tvt-pro">
+                <input type="hidden" name="module_action" value="upload_banner">
+                <input type="file" name="banner_image" accept="image/jpeg,image/png,image/webp" required>
+                <button class="btn btn-primary" type="submit">Subir y usar banner</button>
+              </form>'.
+              ($ui['banner_path']!==''?'<form method="post" action="/admin/modules/action" onsubmit="return confirm(\'¿Eliminar el banner TvT?\')">
+                <input type="hidden" name="_csrf" value="'.$token.'">
+                <input type="hidden" name="slug" value="event-tvt-pro">
+                <input type="hidden" name="module_action" value="delete_banner">
+                <button class="btn btn-danger" type="submit">Eliminar banner</button>
+              </form>':'').'
+            </div>
+          </div>
+
+          <div class="panel" style="margin-top:14px">
+            <span class="eyebrow">DIAGNÓSTICO</span>
+            <h3>Datos TvT</h3>
+            <div class="kpis">'.$cards.'</div>
+            <div class="kpis">
+              <div class="kpi"><span>Partidas</span><strong>'.number_format((int)$overview['matches'],0,',','.').'</strong></div>
+              <div class="kpi"><span>Resultados</span><strong>'.number_format((int)$overview['results'],0,',','.').'</strong></div>
+              <div class="kpi"><span>Jugadores</span><strong>'.number_format((int)$overview['players'],0,',','.').'</strong></div>
+              <div class="kpi"><span>Kills</span><strong>'.number_format((int)$overview['kills'],0,',','.').'</strong></div>
+              <div class="kpi"><span>Objetivos</span><strong>'.number_format((int)$overview['objectives'],0,',','.').'</strong></div>
+              <div class="kpi"><span>Zen entregado</span><strong>'.number_format((int)$overview['zen'],0,',','.').'</strong></div>
+            </div>'.
+            ($missingRows!==''?'<div class="table-wrap"><table><thead><tr><th>Tabla</th><th>Columnas faltantes</th></tr></thead><tbody>'.$missingRows.'</tbody></table></div>':'').
+          '</div>
         </div>';
     }
 
@@ -106,7 +231,8 @@ CSS;
     $sessionKey=trim((string)($query['session']??''));
     $playerName=trim((string)($query['player']??''));
 
-    $showAccountCharacters=$cfgBool('show_account_characters',true);
+    $ui=$settingsService->get();
+    $showAccountCharacters=(bool)$ui['show_account_characters'];
     $accountCharacters=($showAccountCharacters && $accountId!=='')
         ? $service->accountCharacters($accountId)
         : [];
@@ -120,23 +246,28 @@ CSS;
         $playerName=$myCharacter;
     }
 
-    $recentLimit=max(5,min(100,(int)($config['recent_matches']??20)));
-    $rankingLimit=max(10,min(100,(int)($config['ranking_limit']??30)));
-    $timelineLimit=max(20,min(300,(int)($config['timeline_limit']??100)));
-    $showRewards=$cfgBool('show_rewards',true);
-    $showObjectives=$cfgBool('show_objectives',true);
+    $recentLimit=max(5,min(100,(int)$ui['recent_matches']));
+    $rankingLimit=max(10,min(100,(int)$ui['ranking_limit']));
+    $timelineLimit=max(20,min(300,(int)$ui['timeline_limit']));
+    $showRewards=(bool)$ui['show_rewards'];
+    $showObjectives=(bool)$ui['show_objectives'];
 
     $overview=$service->overview();
     $ranking=$service->ranking($rankingLimit);
     $matches=$service->recentMatches($recentLimit);
 
-    $html=$styles().'<div class="tvt">
-      <div class="hero">
-        <span class="eyebrow">EVENT CENTER · TEAM VS TEAM</span>
-        <h2><span class="blue">BLUE</span> ⚔️ <span class="red">RED</span> · TvT</h2>
-        <p class="muted">Historial, ranking y estadísticas reales del evento registrados por el GameServer.</p>
-      </div>
+    $headerHtml='';
+    if($ui['header_mode']==='banner' && $ui['banner_path']!==''){
+        $headerHtml='<div class="tvt-banner"><img src="'.$e($ui['banner_path']).'" alt="'.$e($ui['banner_alt']).'"></div>';
+    }elseif($ui['header_mode']==='design'){
+        $headerHtml='<div class="tvt-hero">
+          <span class="eyebrow">'.$e($ui['design_eyebrow']).'</span>
+          <h2>'.$e($ui['design_title']).'</h2>
+          <p class="muted">'.$e($ui['design_subtitle']).'</p>
+        </div>';
+    }
 
+    $html=$styles().'<div class="tvt">'.$headerHtml.'
       <div class="kpis">
         <div class="kpi"><span>Partidas</span><strong>'.number_format((int)$overview['matches'],0,',','.').'</strong></div>
         <div class="kpi"><span>Participaciones</span><strong>'.number_format((int)$overview['results'],0,',','.').'</strong></div>
