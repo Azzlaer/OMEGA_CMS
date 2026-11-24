@@ -10,6 +10,7 @@ $guildProfessional=$guildProfessional??null;
 $eventStats=$eventStats??null;
 $tvtRanking=$tvtRanking??null;
 $skyEventCenter=$skyEventCenter??null;
+$bloodCastleCenter=$bloodCastleCenter??null;
 
 $tabs=[
  'level'=>['Nivel','Personajes'],
@@ -318,7 +319,14 @@ $guildMarkHtml=static function(mixed $mark,string $name='Guild') use($e): string
     <?= $skyEventCenter ?>
 <?php endif; ?>
 
-<?php if(in_array($type,['bloodcastle','devilsquare'],true) && is_array($eventStats)): ?>
+<?php if($type==='bloodcastle' && is_string($bloodCastleCenter) && $bloodCastleCenter!==''): ?>
+    <?= $bloodCastleCenter ?>
+<?php endif; ?>
+
+<?php if(
+    ($type==='devilsquare' || ($type==='bloodcastle' && (!is_string($bloodCastleCenter) || $bloodCastleCenter==='')))
+    && is_array($eventStats)
+): ?>
 <div class="event-ranking-summary">
     <div class="event-stat-card"><span>Participantes</span><strong><?= number_format((int)($eventStats['participants']??0)) ?></strong><small>registrados</small></div>
     <div class="event-stat-card"><span>Mejor score</span><strong><?= number_format((int)($eventStats['bestScore']??0)) ?></strong><small>récord actual</small></div>
