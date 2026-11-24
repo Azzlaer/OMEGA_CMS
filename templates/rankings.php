@@ -12,6 +12,7 @@ $tvtRanking=$tvtRanking??null;
 $skyEventCenter=$skyEventCenter??null;
 $bloodCastleCenter=$bloodCastleCenter??null;
 $devilSquareCenter=$devilSquareCenter??null;
+$marrySystemRanking=$marrySystemRanking??null;
 
 $tabs=[
  'level'=>['Nivel','Personajes'],
@@ -26,6 +27,7 @@ $tabs=[
  'monsterpoints'=>['Monster Points','Sistemas'],
  'minigames'=>['MiniGames','Sistemas'],
  'goldenarcher'=>['Golden Archer','Sistemas'],
+ 'marrysystem'=>['Casamientos','Sistemas'],
  'dark-wizard'=>['Dark Wizard','Clases'],
  'soul-master'=>['Soul Master','Clases'],
  'dark-knight'=>['Dark Knight','Clases'],
@@ -48,6 +50,7 @@ $descriptions=[
  'monsterpoints'=>'Personajes con mayor saldo y puntos obtenidos por monstruos.',
  'minigames'=>'Ranking global acumulado de todos los MiniGames.',
  'goldenarcher'=>'Ranking de Renas y Stones del Golden Archer.',
+ 'marrysystem'=>'Sistema de Casamientos: parejas activas, bodas, historial y estado personal.',
  'dark-wizard'=>'Ranking exclusivo de Dark Wizard sin evolución.',
  'soul-master'=>'Ranking exclusivo de Soul Master evolucionados.',
  'dark-knight'=>'Ranking exclusivo de Dark Knight sin evolución.',
@@ -88,6 +91,11 @@ $descriptions=[
     <?= is_array($tvtRanking)
         ? (string)($tvtRanking['html']??'<div class="notice-box danger">TvT no disponible.</div>')
         : '<div class="notice-box danger">TvT no disponible.</div>' ?>
+
+<?php elseif($type==='marrysystem'): ?>
+    <?= is_array($marrySystemRanking)
+        ? (string)($marrySystemRanking['html']??'<div class="notice-box danger">Sistema de Casamientos no disponible.</div>')
+        : '<div class="notice-box danger">Sistema de Casamientos no disponible.</div>' ?>
 
 <?php elseif($type==='guilds'): ?>
 <?php
