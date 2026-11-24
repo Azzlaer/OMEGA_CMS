@@ -13,6 +13,7 @@ $skyEventCenter=$skyEventCenter??null;
 $bloodCastleCenter=$bloodCastleCenter??null;
 $devilSquareCenter=$devilSquareCenter??null;
 $marrySystemRanking=$marrySystemRanking??null;
+$duelSystemCenter=$duelSystemCenter??null;
 
 $tabs=[
  'level'=>['Nivel','Personajes'],
@@ -324,6 +325,10 @@ $guildMarkHtml=static function(mixed $mark,string $name='Guild') use($e): string
 <?php endif; ?>
 
 <?php else: ?>
+<?php if($type==='duel' && is_string($duelSystemCenter) && $duelSystemCenter!==''): ?>
+    <?= $duelSystemCenter ?>
+<?php endif; ?>
+
 <?php if($type==='skyevent' && is_string($skyEventCenter) && $skyEventCenter!==''): ?>
     <?= $skyEventCenter ?>
 <?php endif; ?>

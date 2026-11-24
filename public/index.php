@@ -422,6 +422,7 @@ try {
         $bloodCastleCenter=null;
         $devilSquareCenter=null;
         $marrySystemRanking=null;
+        $duelSystemCenter=null;
 
         if($type==='tvt'){
             try{
@@ -511,7 +512,32 @@ try {
                     $skyEventCenter=null;
                 }
             }
-        }elseif(in_array($type,['duel','monsterpoints','minigames','goldenarcher'],true)){
+        }elseif($type==='duel'){
+            $duelLimit=50;
+
+            if($moduleRuntime->isEnabled('duel-history-professional')){
+                try{
+                    $duelSettings=$moduleRuntime->invoke('duel-history-professional','ranking.settings',[]);
+                    if(is_array($duelSettings)){
+                        $duelLimit=max(10,min(100,(int)($duelSettings['ranking_limit']??50)));
+                    }
+                }catch(Throwable){}
+            }
+
+            $rows=$driver->advancedRanking('duel',$duelLimit);
+
+            if($moduleRuntime->isEnabled('duel-history-professional')){
+                try{
+                    $duelSystemCenter=$moduleRuntime->invoke('duel-history-professional','ranking.header',[
+                        'rows'=>$rows,
+                        'query'=>$_GET,
+                        'path'=>$path,
+                    ]);
+                }catch(Throwable){
+                    $duelSystemCenter=null;
+                }
+            }
+        }elseif(in_array($type,['monsterpoints','minigames','goldenarcher'],true)){
             $rows=$driver->advancedRanking($type,50);
         }elseif(($classId=\Omega\GameServer\Drivers\MuEmu097kKayito\CharacterClass::classFromSlug($type))!==null){
             $rows=$driver->classRanking($classId,50);
@@ -533,7 +559,8 @@ try {
             'skyEventCenter'=>$skyEventCenter,
             'bloodCastleCenter'=>$bloodCastleCenter,
             'devilSquareCenter'=>$devilSquareCenter,
-            'marrySystemRanking'=>$marrySystemRanking
+            'marrySystemRanking'=>$marrySystemRanking,
+            'duelSystemCenter'=>$duelSystemCenter
         ]);
         exit;
     }
