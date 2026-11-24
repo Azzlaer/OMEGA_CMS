@@ -1,128 +1,107 @@
-# Duel History Professional v1.0.1
+# Duelos PRO v2.0.0
 
-Módulo instalable para Omega MU CMS.
+Evolución de `Duel History Professional` para OMEGA CMS.
 
-## Instalación
+## Ubicación principal
 
-1. AdminCP → Módulos.
-2. Instalar módulo.
-3. Seleccionar `Omega-Module-Duel-History-Professional-v1.0.1.zip`.
-4. Activar el módulo.
-5. El usuario verá `⚔️ Duel History` dentro de Mi Cuenta.
+**Rankings → Sistemas → Duelos**
 
-No debes reemplazar archivos del CMS.
+URL:
 
-## Tablas utilizadas
+`/rankings?type=duel`
 
-Solo lectura:
+El módulo ya no aparece en el menú de Mi Cuenta.
 
-- `Character`
-- `DuelHistory`
-- `DuelRanking`
+## Fuentes de datos
 
-La estructura detectada en la base MuOnline97 incluye para DuelHistory:
+Modo READ ONLY sobre:
 
-- WinnerAccount
-- WinnerName
-- LoserAccount
-- LoserName
-- WinnerClass
-- LoserClass
-- WinnerLevel
-- LoserLevel
-- WinnerReset
-- LoserReset
-- ArenaID
-- MapNumber
-- DurationSeconds
-- WinnerKills
-- LoserKills
-- KillsToWin
-- FinishReason
-- DuelDate
+- `dbo.DuelRanking`
+- `dbo.DuelHistory`
+- `dbo.Character`
 
-El módulo detecta las columnas en runtime y tolera la ausencia de campos opcionales.
+OMEGA no modifica estas tablas.
 
-## Mi Cuenta
+## Center de Duelos
 
-Muestra:
+El ranking público conserva la tabla nativa de OMEGA y ahora añade un center configurable por encima con:
 
-- total de duelos;
+- jugadores visibles;
+- duelos acumulados;
 - victorias;
-- derrotas;
-- Win Rate;
-- K/D;
-- filtro por personaje de la propia cuenta;
-- tarjetas DuelRanking;
-- rival;
-- marcador;
-- niveles;
-- mapa y arena;
-- duración;
-- motivo de finalización;
-- fecha;
-- duración promedio.
-
-No muestra las cuentas de los rivales.
+- mejor rating;
+- mejor racha opcional.
 
 ## AdminCP
 
-AdminCP → Módulos → Duel History Professional
+Desde:
 
-Incluye diagnóstico:
+**AdminCP → Módulos → Duelos PRO**
 
-- DuelHistory disponible/no disponible;
-- DuelRanking disponible/no disponible;
-- cantidad de registros;
-- comprobación de columnas esperadas;
-- estado READ ONLY.
+se configura:
 
-## Configuración
+- Diseño Duelos
+- Banner personalizado
+- Sin cabecera
+- Eyebrow
+- Título
+- Descripción
+- Cantidad de jugadores del ranking
+- Mostrar/ocultar resumen PvP
+- Mostrar/ocultar mejor racha
 
-Desde el detalle del módulo:
+## Banner
 
-- cantidad máxima de duelos (10–200);
-- mostrar mapa/arena;
-- mostrar duración;
-- mostrar motivo de finalización;
-- mostrar estadísticas de DuelRanking.
+Formatos:
+
+- JPG
+- PNG
+- WEBP
+
+Máximo:
+
+- 8 MB
+
+Dimensiones aceptadas:
+
+- mínimo 640×160
+- máximo 7680×2160
+
+Ruta:
+
+`/public/uploads/duel-system-pro/`
+
+### Ajuste
+
+- Rellenar / `cover`
+- Encajar / `contain`
+- Estirar / `fill`
+- Tamaño natural / `scale-down`
+
+También permite:
+
+- Centro
+- Arriba
+- Abajo
+- Izquierda
+- Derecha
+- Altura entre 160 y 720 px
+
+## Persistencia CMS
+
+La configuración se almacena en:
+
+`dbo.cms_duel_system_settings`
+
+## Compatibilidad
+
+La lógica histórica de `DuelHistory` se conserva internamente para no perder funcionalidad existente, pero la navegación principal del sistema queda centrada en Rankings → Sistemas → Duelos.
 
 ## Seguridad
 
-El módulo es READ ONLY.
-
-No realiza:
-
-- INSERT
-- UPDATE
-- DELETE
-
-sobre las tablas del GameServer.
-
-Los datos mostrados pertenecen únicamente a la cuenta autenticada.
-
-
-## v1.0.1 — ODBC / PDO_SQLSRV Fix
-
-Se corrigió `SQLSTATE[07002]: COUNT field incorrect or syntax error`.
-
-La causa era la reutilización del mismo parámetro nombrado más de una vez
-dentro de una sentencia SQL, algo que PDO_SQLSRV/ODBC Driver 18 puede rechazar.
-
-Antes:
-
-```sql
-WinnerAccount = :account OR LoserAccount = :account
-```
-
-Ahora:
-
-```sql
-WinnerAccount = :account_winner
-OR LoserAccount = :account_loser
-```
-
-La misma corrección se aplicó a:
-- filtro por personaje;
-- filtro por AccountID;
-- fallback por lista de personajes.
+- GameServer en modo READ ONLY
+- CSRF del Core para acciones AdminCP
+- validación real de imágenes
+- no SVG
+- nombres aleatorios para uploads
+- no se expone AccountID públicamente
