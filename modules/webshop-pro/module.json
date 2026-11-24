@@ -1,0 +1,23 @@
+{
+  "name": "WebShop PRO",
+  "slug": "webshop-pro",
+  "version": "1.0.0",
+  "author": "Omega MU CMS / LatinBattle.com",
+  "description": "Tienda web nativa para OMEGA CMS inspirada en AdvancedWebShop: catálogo, categorías, créditos, órdenes, servicios MU y entregas seguras.",
+  "minimum_core": "0.18.0",
+  "enabled_by_default": false,
+  "category": "commerce",
+  "user_menu": {
+    "label": "WebShop",
+    "icon": "🛍️",
+    "order": 48
+  },
+  "actions": [
+    {
+      "key": "runtime_check",
+      "label": "Diagnóstico",
+      "help": "Comprueba tablas, catálogo, billeteras y configuración del WebShop."
+    }
+  ],
+  "config_schema": []
+}
