@@ -220,6 +220,22 @@ final class OmegaTvTEventService
         ];
     }
 
+    public function accountCharacters(string $accountId): array
+    {
+        $accountId=trim($accountId);
+        if($accountId==='') return [];
+
+        if(!$this->tableExists('Character')) return [];
+
+        return $this->db->fetchAll(
+            "SELECT Name,Class,cLevel,ResetCount,GrandResetCount
+             FROM dbo.Character
+             WHERE AccountID=:a
+             ORDER BY Name ASC",
+            ['a'=>$accountId]
+        );
+    }
+
     public function player(string $character): ?array
     {
         $character=trim($character);
