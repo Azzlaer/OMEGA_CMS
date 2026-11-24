@@ -400,7 +400,7 @@ try {
         $allowed = [
             'level','reset','grandreset','guilds',
             'bloodcastle','devilsquare','tvt',
-            'duel','skyevent','monsterpoints','minigames','goldenarcher',
+            'duel','skyevent','monsterpoints','minigames','goldenarcher','marrysystem',
             'dark-wizard','soul-master','dark-knight','blade-knight',
             'fairy-elf','muse-elf','magic-gladiator'
         ];
@@ -409,6 +409,7 @@ try {
 
         $availability = $driver->rankingAvailability();
         $availability['tvt']=$moduleRuntime->isEnabled('event-tvt-pro');
+        $availability['marrysystem']=$moduleRuntime->isEnabled('marrysystem-pro');
 
         if (array_key_exists($type,$availability) && !$availability[$type]) {
             $type='level';
@@ -420,6 +421,7 @@ try {
         $skyEventCenter=null;
         $bloodCastleCenter=null;
         $devilSquareCenter=null;
+        $marrySystemRanking=null;
 
         if($type==='tvt'){
             try{
@@ -432,6 +434,20 @@ try {
                 $tvtRanking=[
                     'available'=>false,
                     'html'=>'<div class="notice-box danger">No fue posible cargar el ranking TvT.</div>'
+                ];
+            }
+            $rows=[];
+        }elseif($type==='marrysystem'){
+            try{
+                $marrySystemRanking=$moduleRuntime->invoke('marrysystem-pro','ranking.page',[
+                    'account_id'=>$auth->currentId(),
+                    'query'=>$_GET,
+                    'path'=>$path,
+                ]);
+            }catch(Throwable $e){
+                $marrySystemRanking=[
+                    'available'=>false,
+                    'html'=>'<div class="notice-box danger">No fue posible cargar el Sistema de Casamientos.</div>'
                 ];
             }
             $rows=[];
@@ -516,7 +532,8 @@ try {
             'tvtRanking'=>$tvtRanking,
             'skyEventCenter'=>$skyEventCenter,
             'bloodCastleCenter'=>$bloodCastleCenter,
-            'devilSquareCenter'=>$devilSquareCenter
+            'devilSquareCenter'=>$devilSquareCenter,
+            'marrySystemRanking'=>$marrySystemRanking
         ]);
         exit;
     }
