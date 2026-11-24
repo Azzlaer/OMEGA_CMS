@@ -1,7 +1,7 @@
 {
   "name": "Evento TvT PRO",
   "slug": "event-tvt-pro",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "Omega MU CMS / LatinBattle.com",
   "description": "Ranking público Team vs Team integrado en Rankings, con historial, partidas y selector opcional de personajes de la cuenta.",
   "minimum_core": "0.18.0",
