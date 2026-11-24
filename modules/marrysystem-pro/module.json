@@ -1,0 +1,11 @@
+{
+  "name": "MarrySystem PRO",
+  "slug": "marrysystem-pro",
+  "version": "1.0.0",
+  "author": "Omega MU CMS / LatinBattle.com",
+  "description": "Sistema de Casamientos para Rankings → Sistemas, con parejas activas, historial, estado personal y banner configurable desde AdminCP.",
+  "minimum_core": "0.18.0",
+  "enabled_by_default": true,
+  "category": "systems",
+  "config_schema": []
+}
